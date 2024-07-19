@@ -1,0 +1,8 @@
+{
+    "sgUrl":"http://localhost",
+    "sgPort":"4984",
+    "sgDb":"sync_gateway",
+    "sgTestUsers":[{"userName":"bob","password":"12345","sgSession":""}],
+    "logPathToWriteTo":"",
+    "debug":false
+}
