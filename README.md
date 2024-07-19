@@ -10,11 +10,11 @@ This script will read a folder of individual JSON files (CBL Documents) and proc
 
 ## HOW TO USE
 
-### Step 1. Update the `config.json` with your Sync Gateway hostname, one or more CBL test users, and other settings you want.
+**Step 1.** Update the `config.json` with your Sync Gateway hostname, one or more CBL test users, and other settings you want.
 
-### Step 2. In the folder `jsons` (or the folder specified in your config), put sample JSON docs as individual files. Example: `{"_id":"foo","channels":["bob"]}` saved in a file `foo.json`.  
+**Step 2.** In the folder `jsons` (or the folder specified in your config), put sample JSON docs as individual files. Example: `{"_id":"foo","channels":["bob"]}` saved in a file `foo.json`.  
 
-### Step 3. Run the Python code 
+**Step 3.** Run the Python code 
 
 ```
 python3 sg-sync-function-tester.py config.json
