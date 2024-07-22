@@ -30,10 +30,10 @@ python3 sg-sync-function-tester.py config.json
 
 Example output:
 ```
-2024-07-19 16:10:39,739 - INFO - User: bob trying to GET: foo at URL: http://localhost:4984/sync_gateway/foo
-2024-07-19 16:10:39,750 - INFO - GET result for foo: None
-2024-07-19 16:10:39,756 - INFO - PUT result for foo: {'id': 'foo', 'ok': True, 'rev': '1-2b47a02d6e166b6f3ff4a9bb67977777'}
-2024-07-19 16:10:39,761 - INFO - Changes feed result for user bob: {'results': [{'seq': 1, 'id': '_user/bob', 'changes': []}, {'seq': 32, 'id': 'foo', 'changes': [{'rev': '1-2b47a02d6e166b6f3ff4a9bb67977777'}]}], 'last_seq': '32'}
+2024-07-22T17:06:30.000 - INFO - [success] - [GET] - [bob] - GET result for [foo] - {"_id": "foo", "_rev": "4-42bc40048cf41b74565750f2d2c55b28", "channels": ["bob"], "dateTimeStamp": "2024-07-22T17:03:56.604936"}
+2024-07-22T17:06:30.000 - INFO - [success] - [PUT] - [bob] - PUT result for [foo] - {"id": "foo", "ok": true, "rev": "5-b9b6eb547de2d751b83457c29610994c"}
+2024-07-22T17:06:30.000 - INFO - [success] - [CHANGES] - [bob] - Changes feed result for [foo], rows: 2 - {"results": [{"seq": 1, "id": "_user/bob", "changes": []}, {"seq": 163, "id": "foo", "changes": [{"rev": "5-b9b6eb547de2d751b83457c29610994c"}]}], "last_seq": "163"}
+
 ```
 
 ## Operations

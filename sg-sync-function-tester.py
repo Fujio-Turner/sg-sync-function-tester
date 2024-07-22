@@ -41,6 +41,14 @@ class WORK:
         self.operations = config.get("operations", self.operations)
 
     def setupLogging(self):
+        class ISO8601Formatter(logging.Formatter):
+            def formatTime(self, record, datefmt=None):
+                ct = self.converter(record.created)
+                if isinstance(ct, time.struct_time):
+                    ct = time.mktime(ct)
+                dt = datetime.fromtimestamp(ct)
+                return dt.isoformat(timespec='milliseconds')
+
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         log_filename = f"{self.sgLogName}_{timestamp}.log"
         logging.basicConfig(
@@ -49,6 +57,11 @@ class WORK:
             format="%(asctime)s - %(levelname)s - %(message)s"
         )
         self.logger = logging.getLogger()
+        
+        # Set the custom formatter for the logger
+        for handler in self.logger.handlers:
+            handler.setFormatter(ISO8601Formatter("%(asctime)s - %(levelname)s - %(message)s"))
+
 
     def httpRequest(self, method, url, json_data=None, userName="", password="", session="", is_admin=False):
         try:
@@ -66,6 +79,7 @@ class WORK:
             response.raise_for_status()
             return response.json() if response.text else None
         except requests.RequestException as e:
+            self.logger.error(f"Error in HTTP {method}: {e}")
             return None
 
     def getChangesFeed(self, userName="", password="", session="", is_admin=False):
@@ -116,7 +130,7 @@ class WORK:
                                     self.logger.info(f"[{status}] - [GET] - [{'Admin' if is_admin else userName}] - GET result for [{doc_id}] - {json.dumps(result) if result else 'null'}")
                                     if result:
                                         rev = result.get('_rev')
-                                except requests.RequestException as e:
+                                except requests.RequestException:
                                     self.logger.info(f"[failed] - [GET] - [{'Admin' if is_admin else userName}] - GET result for [{doc_id}] - null")
 
                             elif op == "PUT":
@@ -136,7 +150,6 @@ class WORK:
                                 except requests.RequestException as e:
                                     self.logger.error(f"[failed] - [PUT] - [{'Admin' if is_admin else userName}] - Error in HTTP PUT for [{doc_id}] - {str(e)}")
                                     self.logger.info(f"[failed] - [PUT] - [{'Admin' if is_admin else userName}] - PUT result for [{doc_id}] - null")
-
 
                             elif op == "DELETE":
                                 try:
