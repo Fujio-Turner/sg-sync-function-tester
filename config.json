@@ -8,12 +8,18 @@
     ],
     "sgAdminUser": "Administrator",
     "sgAdminPassword": "password",
-    "jsonFolder":"jsons",
+    "jsonFolder": "jsons",  
     "logPathToWriteTo": "sync_gateway_log",
     "debug": false,
-    "doGet": true,
-    "doPut": true,
-    "doDelete": false,
-    "doChanges": true,
-    "doPurge": false
+    "operations":[
+                    "GET",
+                    "PUT",
+                    "DELETE",
+                    "CHANGES",
+                    "GET_ADMIN",
+                    "PUT_ADMIN",
+                    "DELETE_ADMIN",
+                    "CHANGES_ADMIN",
+                    "PURGE"
+                ]
 }
