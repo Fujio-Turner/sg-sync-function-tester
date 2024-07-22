@@ -12,15 +12,8 @@
     "logPathToWriteTo": "sync_gateway_log",
     "debug": false,
     "operations":[
-                    "GET",
                     "PUT",
-                    "DELETE",
                     "CHANGES",
-                    "GET_ADMIN",
-                    "PUT_ADMIN",
-                    "DELETE_ADMIN",
-                    "CHANGES_ADMIN",
-                    "SLEEP:3",
                     "PURGE"
                 ]
 }

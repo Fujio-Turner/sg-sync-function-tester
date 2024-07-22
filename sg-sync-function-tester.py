@@ -5,6 +5,7 @@ from requests.auth import HTTPBasicAuth
 from datetime import datetime
 import logging
 import sys
+import time
 
 class WORK:
     # Default configuration values
@@ -15,8 +16,8 @@ class WORK:
     sgDb = "sync_gateway"
     sgTestUsers = [{"userName": "bob", "password": "12345", "sgSession": ""}]
     sgAdminUser = ""
-    sgAdminPassword = ""
-    logPathToWriteTo = ""
+    sgAdminPassword = "Administrator"
+    logPathToWriteTo = "password"
     jsonFolder = "jsons"
     operations = []
 
@@ -87,8 +88,19 @@ class WORK:
                 doc_id = json_data.get("_id")
                 if doc_id:
                     processed_docs.append(doc_id)
-                    rev = None  # Initialize rev to None
+                    rev = None
                     for operation in self.operations:
+                        if operation.startswith("SLEEP"):
+                            sleep_time = 1  # Default sleep time
+                            if ":" in operation:
+                                try:
+                                    sleep_time = int(operation.split(":")[1])
+                                except ValueError:
+                                    self.logger.warning(f"Invalid sleep time format: {operation}. Using default 1 second.")
+                            self.logger.info(f"Sleeping for {sleep_time} seconds")
+                            time.sleep(sleep_time)
+                            continue
+
                         is_admin = operation.endswith("_ADMIN")
                         op = operation.replace("_ADMIN", "")
                         
