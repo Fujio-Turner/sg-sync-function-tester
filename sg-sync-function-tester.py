@@ -66,7 +66,6 @@ class WORK:
             response.raise_for_status()
             return response.json() if response.text else None
         except requests.RequestException as e:
-            self.logger.error(f"Error in HTTP {method}: {e}")
             return None
 
     def getChangesFeed(self, userName="", password="", session="", is_admin=False):
@@ -111,19 +110,23 @@ class WORK:
                             session = user["sgSession"]
 
                             if op == "GET":
-                                self.logger.info(f"User: {'Admin' if is_admin else userName} trying to GET: [{doc_id}]")
                                 try:
                                     result = self.httpRequest("GET", sgUrl, userName=userName, password=password, session=session, is_admin=is_admin)
                                     status = "success" if result else "failed"
-                                    self.logger.info(f"[{status}] - [GET] - [{'Admin' if is_admin else userName}] - GET result for [{doc_id}] - {json.dumps(result)}")
+                                    self.logger.info(f"[{status}] - [GET] - [{'Admin' if is_admin else userName}] - GET result for [{doc_id}] - {json.dumps(result) if result else 'null'}")
                                     if result:
                                         rev = result.get('_rev')
                                 except requests.RequestException as e:
-                                    self.logger.error(f"[failed] - [GET] - [{'Admin' if is_admin else userName}] - Error in HTTP GET for [{doc_id}] - {str(e)}")
                                     self.logger.info(f"[failed] - [GET] - [{'Admin' if is_admin else userName}] - GET result for [{doc_id}] - null")
 
                             elif op == "PUT":
                                 try:
+                                    # Get the current document first
+                                    current_doc = self.httpRequest("GET", sgUrl, userName=userName, password=password, session=session, is_admin=is_admin)
+                                    if current_doc:
+                                        # Update the revision
+                                        json_data['_rev'] = current_doc['_rev']
+                                    
                                     json_data['dateTimeStamp'] = datetime.now().isoformat()
                                     result = self.httpRequest("PUT", sgUrl, json_data=json_data, userName=userName, password=password, session=session, is_admin=is_admin)
                                     status = "success" if result and result.get("ok") else "failed"
@@ -134,15 +137,19 @@ class WORK:
                                     self.logger.error(f"[failed] - [PUT] - [{'Admin' if is_admin else userName}] - Error in HTTP PUT for [{doc_id}] - {str(e)}")
                                     self.logger.info(f"[failed] - [PUT] - [{'Admin' if is_admin else userName}] - PUT result for [{doc_id}] - null")
 
+
                             elif op == "DELETE":
                                 try:
-                                    if rev:
+                                    # Get the current document first
+                                    current_doc = self.httpRequest("GET", sgUrl, userName=userName, password=password, session=session, is_admin=is_admin)
+                                    if current_doc and '_rev' in current_doc:
+                                        rev = current_doc['_rev']
                                         delete_url = f"{self.sgHost}:{self.sgPort}/{self.sgDb}/{doc_id}?rev={rev}"
                                         result = self.httpRequest("DELETE", delete_url, userName=userName, password=password, session=session, is_admin=is_admin)
                                         status = "success" if result and result.get("ok") else "failed"
                                         self.logger.info(f"[{status}] - [DELETE] - [{'Admin' if is_admin else userName}] - DELETE result for [{doc_id}] - {json.dumps(result)}")
                                     else:
-                                        self.logger.warning(f"[failed] - [DELETE] - [{'Admin' if is_admin else userName}] - Unable to delete [{doc_id}] - No revision available")
+                                        self.logger.warning(f"[failed] - [DELETE] - [{'Admin' if is_admin else userName}] - Unable to delete [{doc_id}] - Document not found or no revision available")
                                 except requests.RequestException as e:
                                     self.logger.error(f"[failed] - [DELETE] - [{'Admin' if is_admin else userName}] - Error in HTTP DELETE for [{doc_id}] - {str(e)}")
                                     self.logger.info(f"[failed] - [DELETE] - [{'Admin' if is_admin else userName}] - DELETE result for [{doc_id}] - null")
@@ -152,10 +159,10 @@ class WORK:
                                     result = self.getChangesFeed(userName=userName, password=password, session=session, is_admin=is_admin)
                                     status = "success" if result else "failed"
                                     result_count = len(result.get("results", [])) if result else 0
-                                    self.logger.info(f"[{status}] - [CHANGES] - [{'Admin' if is_admin else userName}] - Changes feed result for [{doc_id}] , rows: {result_count} - {json.dumps(result)}")
+                                    self.logger.info(f"[{status}] - [CHANGES] - [{'Admin' if is_admin else userName}] - Changes feed result for [{doc_id}], rows: {result_count} - {json.dumps(result)}")
                                 except requests.RequestException as e:
                                     self.logger.error(f"[failed] - [CHANGES] - [{'Admin' if is_admin else userName}] - Error in HTTP CHANGES for [{doc_id}] - {str(e)}")
-                                    self.logger.info(f"[failed] - [CHANGES] - [{'Admin' if is_admin else userName}] - Changes feed result for [{doc_id}] , rows: 0 - null")
+                                    self.logger.info(f"[failed] - [CHANGES] - [{'Admin' if is_admin else userName}] - Changes feed result for [{doc_id}], rows: 0 - null")
 
                             elif op == "PURGE":
                                 try:
@@ -165,7 +172,6 @@ class WORK:
                                 except requests.RequestException as e:
                                     self.logger.error(f"[failed] - [PURGE] - [Admin] - Error in HTTP PURGE for [{doc_id}] - {str(e)}")
                                     self.logger.info(f"[failed] - [PURGE] - [Admin] - Purge result for [{doc_id}] - null")
-
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
