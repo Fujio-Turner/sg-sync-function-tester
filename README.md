@@ -6,7 +6,9 @@ Don't want to touch the Sync Gateway Sync Function with a 10-foot pole because w
 
 ## SOLUTION
 
-I wrote this simple Python script to test the Sync Function of Sync Gateway.
+I wrote this simple Python script to test the Sync Function of Sync Gateway with CRUD operations from:
+- Different Users
+- Different DocTypes
 
 ## WHAT IT DOES
 
