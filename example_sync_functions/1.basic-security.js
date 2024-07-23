@@ -10,14 +10,14 @@ function(doc, oldDoc) {
     
             requireRole(["editor", "admin", "user"]);
             fieldCheck(doc.channels);
-    
             channel(doc.channels);
+
         } else if (a[0] === "job") { 
     
             requireRole(["editor", "admin"]);
             fieldCheck(doc.channels);
-    
             channel(doc.channels);
+    
         } else {
     
             throw({forbidden: "error: no docType"});

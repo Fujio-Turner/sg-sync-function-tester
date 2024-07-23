@@ -7,12 +7,25 @@ Don't want to touch the Sync Gateway Sync Function with a 10-foot pole because w
 ## SOLUTION
 
 I wrote this simple Python script to test the Sync Function of Sync Gateway with CRUD operations from:
-- Different Users
-- Different DocTypes
+- different users
+- different docTypes
 
 ## WHAT IT DOES
 
-This script will read a folder of individual JSON files and process them as HTTP [GET, PUT, DELETE, CHANGES, GET_ADMIN, PUT_ADMIN, DELETE_ADMIN , CHANGES_ADMIN and/or PURGE] against your SG endpoint to test your Sync Function as different users.
+This script will:
+1. read a folder of individual JSON files
+2. process each of the JSON file as HTTP [GET, PUT, DELETE, CHANGES, GET_ADMIN, PUT_ADMIN, DELETE_ADMIN , CHANGES_ADMIN and/or PURGE] against your SG endpoint to test your Sync Function
+3. do the above as different users
+
+## REQUIREMENTS 
+- A Running Sync Gateway w/ one or more known Sync Gateway USERS (cbl user)
+- Python 3
+- Python Requests Library: https://docs.python-requests.org/en/latest/index.html
+
+To install the required library:
+```sh
+pip install requests
+```
 
 ## HOW TO USE
 
@@ -109,19 +122,12 @@ Here is a link to understand what the Sync Function can and can not do.
 - [Offical Docs for Sync Gateway's Sync Function](https://docs.couchbase.com/sync-gateway/current/sync-function.html#ex-sync-function)
 
 #### Sample Sync Functions:
-- [Github.com - sync_gateway Sample](https://github.com/couchbase/sync_gateway/blob/main/examples/database_config/sync-function.json)
-- [Github.com - travel-sample Sample](https://github.com/couchbaselabs/mobile-travel-sample/blob/master/sync-gateway-config-travelsample-docker.json#L65)
-- [Github.com - todo Sample](https://github.com/couchbaselabs/mobile-training-todo/blob/release/helium/docker/sg-setup/config/sync-function.json#L7)
+- [Github.com - basic-security](https://github.com/Fujio-Turner/sg-sync-function-tester/blob/main/example_sync_functions/1.basic-security.js)
+- [Github.com - sync_gateway](https://github.com/couchbase/sync_gateway/blob/main/examples/database_config/sync-function.json)
+- [Github.com - travel-sample](https://github.com/couchbaselabs/mobile-travel-sample/blob/master/sync-gateway-config-travelsample-docker.json#L65)
+- [Github.com - todo](https://github.com/couchbaselabs/mobile-training-todo/blob/release/helium/docker/sg-setup/config/sync-function.json#L7)
 
-## REQUIREMENTS 
-- A Running Sync Gateway w/ one or more known Sync Gateway USERS (cbl user)
-- Python 3
-- Python Requests Library: https://docs.python-requests.org/en/latest/index.html
 
-To install the required library:
-```sh
-pip install requests
-```
 
 ### Key Changes:
 1. **Updated the `operations` Configuration**: Added an `operations` attribute to specify the list of operations to perform.
