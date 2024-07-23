@@ -3,6 +3,8 @@
     "sgPort": "4984",
     "sgAdminPort": "4985",
     "sgDb": "sync_gateway",
+    "sgDbScope":"_default",
+    "sgDbCollection":"_default",
     "sgTestUsers": [
         {"userName": "bob", "password": "12345", "sgSession": ""}
     ],
