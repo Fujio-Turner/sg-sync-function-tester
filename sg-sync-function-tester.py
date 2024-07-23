@@ -19,6 +19,8 @@ class WORK:
     sgAdminPassword = "Administrator"
     logPathToWriteTo = "password"
     jsonFolder = "jsons"
+    sgDbScope = "_default"
+    sgDbCollection = "_default"
     operations = []
 
     def __init__(self, config_file):
@@ -26,19 +28,47 @@ class WORK:
         self.setupLogging()
 
     def readConfig(self, config_file):
-        with open(config_file, "r") as f:
-            config = json.load(f)
-        self.sgLogName = config.get("logPathToWriteTo", self.logPathToWriteTo)
-        self.sgHost = config.get("sgHost", self.sgHost)
-        self.sgPort = config.get("sgPort", self.sgPort)
-        self.sgAdminPort = config.get("sgAdminPort", self.sgAdminPort)
-        self.sgDb = config.get("sgDb", self.sgDb)
-        self.sgTestUsers = config.get("sgTestUsers", self.sgTestUsers)
-        self.sgAdminUser = config.get("sgAdminUser", self.sgAdminUser)
-        self.sgAdminPassword = config.get("sgAdminPassword", self.sgAdminPassword)
-        self.jsonFolder = config.get("jsonFolder", self.jsonFolder)
-        self.debug = config.get("debug", self.debug)
-        self.operations = config.get("operations", self.operations)
+            with open(config_file, "r") as f:
+                config = json.load(f)
+            self.sgLogName = config.get("logPathToWriteTo", self.logPathToWriteTo)
+            self.sgHost = config.get("sgHost", self.sgHost)
+            self.sgPort = config.get("sgPort", self.sgPort)
+            self.sgAdminPort = config.get("sgAdminPort", self.sgAdminPort)
+            self.sgDb = config.get("sgDb", self.sgDb)
+            self.sgDbScope = config.get("sgDbScope", self.sgDbScope)
+            self.sgDbCollection = config.get("sgDbCollection", self.sgDbCollection)
+            self.sgTestUsers = config.get("sgTestUsers", self.sgTestUsers)
+            self.sgAdminUser = config.get("sgAdminUser", self.sgAdminUser)
+            self.sgAdminPassword = config.get("sgAdminPassword", self.sgAdminPassword)
+            self.jsonFolder = config.get("jsonFolder", self.jsonFolder)
+            self.debug = config.get("debug", self.debug)
+            self.operations = config.get("operations", self.operations)
+
+    def constructDbUrl(self):
+        if self.sgDbScope == "_default" and self.sgDbCollection == "_default":
+            return self.sgDb
+        else:
+            return f"{self.sgDb}.{self.sgDbScope}.{self.sgDbCollection}"
+
+    def httpRequest(self, method, url, json_data=None, userName="", password="", session="", is_admin=False):
+        try:
+            headers = {"Content-Type": "application/json"}
+            if session:
+                headers["Cookie"] = f"SyncGatewaySession={session}"
+            
+            if is_admin:
+                auth = HTTPBasicAuth(self.sgAdminUser, self.sgAdminPassword)
+                url = url.replace(f":{self.sgPort}/", f":{self.sgAdminPort}/")
+            else:
+                auth = HTTPBasicAuth(userName, password) if userName and password else None
+
+            response = requests.request(method, url, json=json_data, headers=headers, auth=auth)
+            response.raise_for_status()
+            return response.json() if response.text else None
+        except requests.RequestException as e:
+            self.logger.error(f"[failed] - [{method}] - [{'Admin' if is_admin else userName}] - Error in HTTP {method}: {str(e)}")
+            return None
+
 
     def setupLogging(self):
         class ISO8601Formatter(logging.Formatter):
@@ -63,31 +93,12 @@ class WORK:
             handler.setFormatter(ISO8601Formatter("%(asctime)s - %(levelname)s - %(message)s"))
 
 
-    def httpRequest(self, method, url, json_data=None, userName="", password="", session="", is_admin=False):
-        try:
-            headers = {"Content-Type": "application/json"}
-            if session:
-                headers["Cookie"] = f"SyncGatewaySession={session}"
-            
-            if is_admin:
-                auth = HTTPBasicAuth(self.sgAdminUser, self.sgAdminPassword)
-                url = url.replace(f":{self.sgPort}/", f":{self.sgAdminPort}/")
-            else:
-                auth = HTTPBasicAuth(userName, password) if userName and password else None
-
-            response = requests.request(method, url, json=json_data, headers=headers, auth=auth)
-            response.raise_for_status()
-            return response.json() if response.text else None
-        except requests.RequestException as e:
-            self.logger.error(f"[failed] - [{method}] - [{'Admin' if is_admin else userName}] - Error in HTTP {method}: {str(e)}")
-            return None
-
     def getChangesFeed(self, userName="", password="", session="", is_admin=False):
-        sgUrl = f"{self.sgHost}:{self.sgPort}/{self.sgDb}/_changes"
-        return self.httpRequest("GET", sgUrl, userName=userName, password=password, session=session, is_admin=is_admin)
+            sgUrl = f"{self.sgHost}:{self.sgPort}/{self.constructDbUrl()}/_changes"
+            return self.httpRequest("GET", sgUrl, userName=userName, password=password, session=session, is_admin=is_admin)
 
     def postPurge(self, docIds):
-        sgUrl = f"{self.sgHost}:{self.sgAdminPort}/{self.sgDb}/_purge"
+        sgUrl = f"{self.sgHost}:{self.sgAdminPort}/{self.constructDbUrl()}/_purge"
         purgeData = {docId: ["*"] for docId in docIds}
         return self.httpRequest("POST", sgUrl, json_data=purgeData, is_admin=True)
 
@@ -118,10 +129,11 @@ class WORK:
                         op = operation.replace("_ADMIN", "")
                         
                         for user in self.sgTestUsers:
-                            sgUrl = f"{self.sgHost}:{self.sgPort}/{self.sgDb}/{doc_id}"
+                            sgUrl = f"{self.sgHost}:{self.sgPort}/{self.constructDbUrl()}/{doc_id}"
                             userName = user["userName"]
                             password = user["password"]
                             session = user["sgSession"]
+
 
                             if op == "GET":
                                 try:

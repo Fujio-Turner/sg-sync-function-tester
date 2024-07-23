@@ -101,6 +101,8 @@ python3 sg-sync-function-tester.py 3.admin_put-user_delete.json
     "sgPort": "4984",
     "sgAdminPort": "4985",
     "sgDb": "sync_gateway",
+    "sgDbScope":"_default",
+    "sgDbCollection":"_default",
     "sgTestUsers": [
         {"userName": "bob", "password": "12345", "sgSession": ""}
     ],
@@ -112,6 +114,9 @@ python3 sg-sync-function-tester.py 3.admin_put-user_delete.json
     "operations": ["GET", "PUT", "DELETE", "CHANGES", "GET_ADMIN", "PUT_ADMIN", "DELETE_ADMIN", "CHANGES_ADMIN","SLEEP:3","GET_RAW","PURGE"]  // Specify the order of operations and/or indivdual operations
 }
 ```
+
+### **Scopes and Collection**
+If your not using scopes and collections for mobile yet just leave the default values of: `"sgDbScope":"_default"` and `"sgDbCollection":"_default"`. This script will not test all your collections at once. You have to have a different `config.json` for each collection Sync Function.
 
 ### **PRO TIP**
 "PURGE" is a great way to clean up data between tests. It literally 100% removes the document from Sync Gateway and the Couchbase Bucket. NOTE: PURGE is a Sync Gateway Admin function. In the config.json, you'll need to add Sync Admin (Couchbase Server RBAC [`Sync Gateway Architect`](https://docs.couchbase.com/server/current/learn/security/roles.html#sync-gateway-configurator) ) credentials for `sgAdminUser` and `sgAdminPassword`. Link here for [Offical Docs for: POST {db}/_purge](https://docs.couchbase.com/sync-gateway/current/rest-api-admin.html#/Document/post_keyspace__purge)
@@ -136,6 +141,7 @@ Here is a link to understand what the Sync Function can and can not do.
 4. **Admin Operations**: Your Sync Function might have certain restrictions at a USER level, but you still need to GET and PUT docs. There are now admin equivalents to the operations.
 5. **Sleep Operation**: Added a new `SLEEP` operation that allows pausing execution between other operations. This can be useful for testing time-sensitive scenarios or simulating delays.
 6. **HTTP GET /_raw/{docId}**: Added a new `GET_RAW` operation that allows you to get the document from Sync Gateway exactly how it is stored in Couchbase Server includes all the meta / bookkeeping data from `_sync`.
+7. **Scopes and Collection**: In the `config.json` just pass in non-default(`_default`) value for `sgDbScope` and `sgDbCollection` to test scopes and collection Sync Functions.
 
 
 Works on My Computer - Tested & Certified ;-)
