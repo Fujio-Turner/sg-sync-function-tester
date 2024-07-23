@@ -41,6 +41,7 @@ Example output:
 The script supports the following operations:
 
 - `GET`: Retrieve a document
+    - `GET_RAW`: Retrieve a document with full meta data(`_sync`)
 - `PUT`: Create or update a document
 - `DELETE`: Delete a document
 - `CHANGES`: Get the changes feed
@@ -95,7 +96,7 @@ python3 sg-sync-function-tester.py 3.admin_put-user_delete.json
     "jsonFolder": "jsons",   // Folder containing all your individual json files
     "logPathToWriteTo": "sync_gateway_log",
     "debug": false,
-    "operations": ["GET", "PUT", "DELETE", "CHANGES", "GET_ADMIN", "PUT_ADMIN", "DELETE_ADMIN", "CHANGES_ADMIN","SLEEP:3","PURGE"]  // Specify the order of operations and/or indivdual operations
+    "operations": ["GET", "PUT", "DELETE", "CHANGES", "GET_ADMIN", "PUT_ADMIN", "DELETE_ADMIN", "CHANGES_ADMIN","SLEEP:3","GET_RAW","PURGE"]  // Specify the order of operations and/or indivdual operations
 }
 ```
 
@@ -128,6 +129,7 @@ pip install requests
 3. **Clarified Usage Instructions**: Updated the usage instructions to reflect the new configuration options.
 4. **Admin Operations**: Your Sync Function might have certain restrictions at a USER level, but you still need to GET and PUT docs. There are now admin equivalents to the operations.
 5. **Sleep Operation**: Added a new `SLEEP` operation that allows pausing execution between other operations. This can be useful for testing time-sensitive scenarios or simulating delays.
+^. **Admin HTTP GET _raw/{docId}**: Added a new `GET_RAW` operation that allows you to get the document from Sync Gateway exactly how it is stored in Couchbase Server includes all the meta / bookkeeping data from `_sync`.
 
 
 Works on My Computer - Tested & Certified ;-)

@@ -79,7 +79,7 @@ class WORK:
             response.raise_for_status()
             return response.json() if response.text else None
         except requests.RequestException as e:
-            self.logger.error(f"Error in HTTP {method}: {e}")
+            self.logger.error(f"[failed] - [{method}] - [{'Admin' if is_admin else userName}] - Error in HTTP {method}: {str(e)}")
             return None
 
     def getChangesFeed(self, userName="", password="", session="", is_admin=False):
@@ -185,6 +185,16 @@ class WORK:
                                 except requests.RequestException as e:
                                     self.logger.error(f"[failed] - [PURGE] - [Admin] - Error in HTTP PURGE for [{doc_id}] - {str(e)}")
                                     self.logger.info(f"[failed] - [PURGE] - [Admin] - Purge result for [{doc_id}] - null")
+                            
+                            elif op == "GET_RAW":
+                                try:
+                                    raw_url = f"{self.sgHost}:{self.sgAdminPort}/{self.sgDb}/_raw/{doc_id}"
+                                    result = self.httpRequest("GET", raw_url, is_admin=True)
+                                    status = "success" if result else "failed"
+                                    self.logger.info(f"[{status}] - [GET_RAW] - [Admin] - GET_RAW result for [{doc_id}] - {json.dumps(result) if result else 'null'}")
+                                except requests.RequestException as e:
+                                    self.logger.error(f"[failed] - [GET_RAW] - [Admin] - Error in HTTP GET_RAW for [{doc_id}] - {str(e)}")
+                                    self.logger.info(f"[failed] - [GET_RAW] - [Admin] - GET_RAW result for [{doc_id}] - null")
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:

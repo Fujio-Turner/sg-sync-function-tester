@@ -21,6 +21,7 @@
                     "DELETE_ADMIN",
                     "CHANGES_ADMIN",
                     "SLEEP:3",
+                    "GET_RAW",
                     "PURGE"
                 ]
 }
