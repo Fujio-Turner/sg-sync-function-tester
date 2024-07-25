@@ -57,11 +57,13 @@ The script supports the following operations:
     - `GET_RAW`: Retrieve a document with full meta data(`_sync`)
 - `PUT`: Create or update a document
 - `DELETE`: Delete a document
-- `CHANGES`: Get the changes feed
+- `CHANGES`: Get the changes feed. To filter channel(s) on the change just add your channel(s) names: `CHANGES:bob` or `CHANGES:bob,water`
 - `PURGE`: Purge a document (admin only)
 - `SLEEP`: Pause execution for a specified number of seconds
 
 Admin versions of operations are available by appending `_ADMIN` to the operation name (e.g., `GET_ADMIN`, `PUT_ADMIN`).
+
+<span style="background-color: #FFFF00">**Warning**t</span>: If you do `CHANGES_ADMIN` with out a channel filter like `CHANGES_ADMIN:bob` Sync Gateway will process your whole database `_changes`  feed in the output.
 
 ### SLEEP Operation
 
@@ -142,6 +144,7 @@ Here is a link to understand what the Sync Function can and can not do.
 5. **Sleep Operation**: Added a new `SLEEP` operation that allows pausing execution between other operations. This can be useful for testing time-sensitive scenarios or simulating delays.
 6. **HTTP GET /_raw/{docId}**: Added a new `GET_RAW` operation that allows you to get the document from Sync Gateway exactly how it is stored in Couchbase Server includes all the meta / bookkeeping data from `_sync`.
 7. **Scopes and Collection**: In the `config.json` just pass in non-default(`_default`) value for `sgDbScope` and `sgDbCollection` to test scopes and collection Sync Functions.
+8. **CHANGES Channel(s) Filter**: Add the channel(s) you want to filter by in the changes operation like this:`CHANGES:bob` .
 
 
 Works on My Computer - Tested & Certified ;-)

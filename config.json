@@ -18,6 +18,7 @@
                     "PUT",
                     "DELETE",
                     "CHANGES",
+                    "CHANGES:bob",
                     "GET_ADMIN",
                     "PUT_ADMIN",
                     "DELETE_ADMIN",

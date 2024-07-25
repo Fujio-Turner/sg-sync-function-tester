@@ -14,13 +14,13 @@ class WORK:
     sgPort = "4984"
     sgAdminPort = "4985"
     sgDb = "sync_gateway"
+    sgDbScope = "_default"
+    sgDbCollection = "_default"
     sgTestUsers = [{"userName": "bob", "password": "12345", "sgSession": ""}]
     sgAdminUser = ""
     sgAdminPassword = "Administrator"
     logPathToWriteTo = "password"
     jsonFolder = "jsons"
-    sgDbScope = "_default"
-    sgDbCollection = "_default"
     operations = []
 
     def __init__(self, config_file):
@@ -28,21 +28,43 @@ class WORK:
         self.setupLogging()
 
     def readConfig(self, config_file):
-            with open(config_file, "r") as f:
-                config = json.load(f)
-            self.sgLogName = config.get("logPathToWriteTo", self.logPathToWriteTo)
-            self.sgHost = config.get("sgHost", self.sgHost)
-            self.sgPort = config.get("sgPort", self.sgPort)
-            self.sgAdminPort = config.get("sgAdminPort", self.sgAdminPort)
-            self.sgDb = config.get("sgDb", self.sgDb)
-            self.sgDbScope = config.get("sgDbScope", self.sgDbScope)
-            self.sgDbCollection = config.get("sgDbCollection", self.sgDbCollection)
-            self.sgTestUsers = config.get("sgTestUsers", self.sgTestUsers)
-            self.sgAdminUser = config.get("sgAdminUser", self.sgAdminUser)
-            self.sgAdminPassword = config.get("sgAdminPassword", self.sgAdminPassword)
-            self.jsonFolder = config.get("jsonFolder", self.jsonFolder)
-            self.debug = config.get("debug", self.debug)
-            self.operations = config.get("operations", self.operations)
+        with open(config_file, "r") as f:
+            config = json.load(f)
+        self.sgLogName = config.get("logPathToWriteTo", self.logPathToWriteTo)
+        self.sgHost = config.get("sgHost", self.sgHost)
+        self.sgPort = config.get("sgPort", self.sgPort)
+        self.sgAdminPort = config.get("sgAdminPort", self.sgAdminPort)
+        self.sgDb = config.get("sgDb", self.sgDb)
+        self.sgDbScope = config.get("sgDbScope", self.sgDbScope)
+        self.sgDbCollection = config.get("sgDbCollection", self.sgDbCollection)
+        self.sgTestUsers = config.get("sgTestUsers", self.sgTestUsers)
+        self.sgAdminUser = config.get("sgAdminUser", self.sgAdminUser)
+        self.sgAdminPassword = config.get("sgAdminPassword", self.sgAdminPassword)
+        self.jsonFolder = config.get("jsonFolder", self.jsonFolder)
+        self.debug = config.get("debug", self.debug)
+        self.operations = config.get("operations", self.operations)
+
+    def setupLogging(self):
+        class ISO8601Formatter(logging.Formatter):
+            def formatTime(self, record, datefmt=None):
+                ct = self.converter(record.created)
+                if isinstance(ct, time.struct_time):
+                    ct = time.mktime(ct)
+                dt = datetime.fromtimestamp(ct)
+                return dt.isoformat(timespec='milliseconds')
+
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        log_filename = f"{self.sgLogName}_{timestamp}.log"
+        logging.basicConfig(
+            filename=log_filename,
+            level=logging.DEBUG if self.debug else logging.INFO,
+            format="%(asctime)s - %(levelname)s - %(message)s"
+        )
+        self.logger = logging.getLogger()
+        
+        # Set the custom formatter for the logger
+        for handler in self.logger.handlers:
+            handler.setFormatter(ISO8601Formatter("%(asctime)s - %(levelname)s - %(message)s"))
 
     def constructDbUrl(self):
         if self.sgDbScope == "_default" and self.sgDbCollection == "_default":
@@ -69,33 +91,11 @@ class WORK:
             self.logger.error(f"[failed] - [{method}] - [{'Admin' if is_admin else userName}] - Error in HTTP {method}: {str(e)}")
             return None
 
-
-    def setupLogging(self):
-        class ISO8601Formatter(logging.Formatter):
-            def formatTime(self, record, datefmt=None):
-                ct = self.converter(record.created)
-                if isinstance(ct, time.struct_time):
-                    ct = time.mktime(ct)
-                dt = datetime.fromtimestamp(ct)
-                return dt.isoformat(timespec='milliseconds')
-
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        log_filename = f"{self.sgLogName}_{timestamp}.log"
-        logging.basicConfig(
-            filename=log_filename,
-            level=logging.DEBUG if self.debug else logging.INFO,
-            format="%(asctime)s - %(levelname)s - %(message)s"
-        )
-        self.logger = logging.getLogger()
-        
-        # Set the custom formatter for the logger
-        for handler in self.logger.handlers:
-            handler.setFormatter(ISO8601Formatter("%(asctime)s - %(levelname)s - %(message)s"))
-
-
-    def getChangesFeed(self, userName="", password="", session="", is_admin=False):
-            sgUrl = f"{self.sgHost}:{self.sgPort}/{self.constructDbUrl()}/_changes"
-            return self.httpRequest("GET", sgUrl, userName=userName, password=password, session=session, is_admin=is_admin)
+    def getChangesFeed(self, userName="", password="", session="", is_admin=False, channels=None):
+        sgUrl = f"{self.sgHost}:{self.sgPort}/{self.sgDb}/_changes"
+        if channels:
+            sgUrl += f"?filter=sync_gateway/bychannel&channels={channels}"
+        return self.httpRequest("GET", sgUrl, userName=userName, password=password, session=session, is_admin=is_admin)
 
     def postPurge(self, docIds):
         sgUrl = f"{self.sgHost}:{self.sgAdminPort}/{self.constructDbUrl()}/_purge"
@@ -134,7 +134,6 @@ class WORK:
                             password = user["password"]
                             session = user["sgSession"]
 
-
                             if op == "GET":
                                 try:
                                     result = self.httpRequest("GET", sgUrl, userName=userName, password=password, session=session, is_admin=is_admin)
@@ -169,7 +168,7 @@ class WORK:
                                     current_doc = self.httpRequest("GET", sgUrl, userName=userName, password=password, session=session, is_admin=is_admin)
                                     if current_doc and '_rev' in current_doc:
                                         rev = current_doc['_rev']
-                                        delete_url = f"{self.sgHost}:{self.sgPort}/{self.sgDb}/{doc_id}?rev={rev}"
+                                        delete_url = f"{self.sgHost}:{self.sgPort}/{self.constructDbUrl()}/{doc_id}?rev={rev}"
                                         result = self.httpRequest("DELETE", delete_url, userName=userName, password=password, session=session, is_admin=is_admin)
                                         status = "success" if result and result.get("ok") else "failed"
                                         self.logger.info(f"[{status}] - [DELETE] - [{'Admin' if is_admin else userName}] - DELETE result for [{doc_id}] - {json.dumps(result)}")
@@ -179,9 +178,12 @@ class WORK:
                                     self.logger.error(f"[failed] - [DELETE] - [{'Admin' if is_admin else userName}] - Error in HTTP DELETE for [{doc_id}] - {str(e)}")
                                     self.logger.info(f"[failed] - [DELETE] - [{'Admin' if is_admin else userName}] - DELETE result for [{doc_id}] - null")
 
-                            elif op == "CHANGES":
+                            elif op.startswith("CHANGES"):
                                 try:
-                                    result = self.getChangesFeed(userName=userName, password=password, session=session, is_admin=is_admin)
+                                    channels = None
+                                    if ":" in op:
+                                        channels = op.split(":", 1)[1]
+                                    result = self.getChangesFeed(userName=userName, password=password, session=session, is_admin=is_admin, channels=channels)
                                     status = "success" if result else "failed"
                                     result_count = len(result.get("results", [])) if result else 0
                                     self.logger.info(f"[{status}] - [CHANGES] - [{'Admin' if is_admin else userName}] - Changes feed result for [{doc_id}], rows: {result_count} - {json.dumps(result)}")
@@ -197,10 +199,10 @@ class WORK:
                                 except requests.RequestException as e:
                                     self.logger.error(f"[failed] - [PURGE] - [Admin] - Error in HTTP PURGE for [{doc_id}] - {str(e)}")
                                     self.logger.info(f"[failed] - [PURGE] - [Admin] - Purge result for [{doc_id}] - null")
-                            
+
                             elif op == "GET_RAW":
                                 try:
-                                    raw_url = f"{self.sgHost}:{self.sgAdminPort}/{self.sgDb}/_raw/{doc_id}"
+                                    raw_url = f"{self.sgHost}:{self.sgAdminPort}/{self.constructDbUrl()}/_raw/{doc_id}"
                                     result = self.httpRequest("GET", raw_url, is_admin=True)
                                     status = "success" if result else "failed"
                                     self.logger.info(f"[{status}] - [GET_RAW] - [Admin] - GET_RAW result for [{doc_id}] - {json.dumps(result) if result else 'null'}")
