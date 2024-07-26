@@ -54,7 +54,7 @@ Example output:
 The script supports the following operations:
 
 - `GET`: Retrieve a document
-    - `GET_RAW`: Retrieve a document with full meta data(`_sync`)
+    - `GET_RAW`: Retrieve a document with full meta data `_sync` (admin only)
 - `PUT`: Create or update a document
 - `DELETE`: Delete a document
 - `CHANGES`: Get the changes feed. To filter channel(s) on the change just add your channel(s) names: `CHANGES:bob` or `CHANGES:bob,water`
@@ -63,7 +63,7 @@ The script supports the following operations:
 
 Admin versions of operations are available by appending `_ADMIN` to the operation name (e.g., `GET_ADMIN`, `PUT_ADMIN`).
 
-<span style="background-color: #FFFF00">**Warning**t</span>: If you do `CHANGES_ADMIN` with out a channel filter like `CHANGES_ADMIN:bob` Sync Gateway will process your whole database `_changes`  feed in the output.
+<mark style="background-color: yellow;">**Warning**</mark>: If you do `CHANGES_ADMIN` without a channel filter like `CHANGES_ADMIN:bob` Sync Gateway will process your whole database `_changes` feed in the output.
 
 ### SLEEP Operation
 
