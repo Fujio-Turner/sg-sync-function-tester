@@ -1,27 +1,33 @@
 function(doc, oldDoc) {
-    var a = doc._id.split(":");
 
-    if (doc.deleted && doc.deleted === true) {
+    let a;
+    try {
+        a = doc._id.split(":");
+    } catch (error) {
+        throw({ forbidden: "error: invalid document ID format" });
+    }
+
+    if (doc.deleted) {
 
         requireRole(["editor", "admin"]);
-    
+
     } else {
         if (a[0] === "order") {
-    
+
             requireRole(["editor", "admin", "user"]);
             fieldCheck(doc.channels);
             channel(doc.channels);
 
-        } else if (a[0] === "job") { 
-    
-            requireRole(["editor", "admin"]);
+        } else if (a[0] === "job") {
+
+            requireRole(["manager","editor", "admin"]);
             fieldCheck(doc.channels);
             channel(doc.channels);
-    
+
         } else {
-    
-            throw({forbidden: "error: no docType"});
-    
+
+            throw({forbidden: "error: invalid docType"});
+
         }
     }
 }
