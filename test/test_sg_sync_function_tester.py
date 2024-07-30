@@ -6,18 +6,18 @@ import sys
 from datetime import datetime
 from requests.auth import HTTPBasicAuth
 
-#import tracemalloc
-#tracemalloc.start()
-
 # Add the root directory to the sys.path to allow imports
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from sg_sync_function_tester import WORK  # Import the WORK class from the root directory
+from sg_sync_function_tester import WORK # Import the WORK class from the root directory
 
 class TestWORK(unittest.TestCase):
-
+    
     def setUp(self):
-        # Create a sample config file
+        # This method runs before each test
+        # It sets up the test environment by creating a sample configuration and JSON document
+        
+        # Create a sample config file with test settings
         self.config = {
             "sgHost": "http://localhost",
             "sgPort": "4984",
@@ -35,21 +35,26 @@ class TestWORK(unittest.TestCase):
             "debug": False,
             "operations": ["GET", "PUT", "DELETE", "CHANGES", "GET_ADMIN", "PUT_ADMIN", "DELETE_ADMIN", "CHANGES_ADMIN", "SLEEP:3", "GET_RAW", "PURGE"]
         }
+        
+        # Write the config to a temporary file
         self.config_file = 'test_config.json'
         with open(self.config_file, 'w') as f:
             json.dump(self.config, f)
 
-        # Create a sample JSON document
+        # Create a sample JSON document in a temporary folder
         self.json_folder = 'jsons'
         os.makedirs(self.json_folder, exist_ok=True)
         self.sample_doc = {"_id": "foo", "channels": ["bob"]}
         with open(os.path.join(self.json_folder, 'foo.json'), 'w') as f:
             json.dump(self.sample_doc, f)
 
+        # Initialize the WORK object with the test config
         self.work = WORK(self.config_file)
 
     def tearDown(self):
-        # Clean up
+        # This method runs after each test
+        # It cleans up the test environment by removing temporary files and folders
+        
         os.remove(self.config_file)
         for filename in os.listdir(self.json_folder):
             file_path = os.path.join(self.json_folder, filename)
@@ -59,37 +64,49 @@ class TestWORK(unittest.TestCase):
 
     @patch('requests.request')
     def test_httpRequest_get(self, mock_request):
-        # Mock the GET request
+        # This test checks the GET functionality of the httpRequest method
+        
+        # Mock the GET request response
         mock_response = MagicMock()
         mock_response.json.return_value = self.sample_doc
         mock_response.text = json.dumps(self.sample_doc)
         mock_response.raise_for_status = MagicMock()
         mock_request.return_value = mock_response
 
+        # Perform the GET request
         url = f"{self.work.sgHost}:{self.work.sgPort}/{self.work.constructDbUrl()}/foo"
         result = self.work.httpRequest("GET", url, userName="bob", password="12345")
 
+        # Assert that the result matches the expected sample document
         self.assertEqual(result, self.sample_doc)
+        # Verify that the request was made with the correct parameters
         mock_request.assert_called_once_with("GET", url, json=None, headers={'Content-Type': 'application/json'}, auth=HTTPBasicAuth("bob", "12345"))
 
     @patch('requests.request')
     def test_httpRequest_put(self, mock_request):
-        # Mock the PUT request
+        # This test checks the PUT functionality of the httpRequest method
+        
+        # Mock the PUT request response
         mock_response = MagicMock()
         mock_response.json.return_value = {"ok": True, "id": "foo", "rev": "1-a"}
         mock_response.text = json.dumps({"ok": True, "id": "foo", "rev": "1-a"})
         mock_response.raise_for_status = MagicMock()
         mock_request.return_value = mock_response
 
+        # Perform the PUT request
         url = f"{self.work.sgHost}:{self.work.sgPort}/{self.work.constructDbUrl()}/foo"
         result = self.work.httpRequest("PUT", url, json_data=self.sample_doc, userName="bob", password="12345")
 
+        # Assert that the result matches the expected response
         self.assertEqual(result, {"ok": True, "id": "foo", "rev": "1-a"})
+        # Verify that the request was made with the correct parameters
         mock_request.assert_called_once_with("PUT", url, json=self.sample_doc, headers={'Content-Type': 'application/json'}, auth=HTTPBasicAuth("bob", "12345"))
 
     @patch('requests.request')
     def test_getChangesFeed(self, mock_request):
-        # Mock the GET _changes request
+        # This test checks the getChangesFeed method
+        
+        # Mock the GET _changes request response
         changes_feed = {
             "results": [{"seq": 1, "id": "foo", "changes": [{"rev": "1-a"}]}],
             "last_seq": "1"
@@ -100,15 +117,20 @@ class TestWORK(unittest.TestCase):
         mock_response.raise_for_status = MagicMock()
         mock_request.return_value = mock_response
 
+        # Perform the getChangesFeed request
         result = self.work.getChangesFeed(userName="bob", password="12345")
 
+        # Assert that the result matches the expected changes feed
         self.assertEqual(result, changes_feed)
+        # Verify that the request was made with the correct parameters
         url = f"{self.work.sgHost}:{self.work.sgPort}/{self.work.constructDbUrl()}/_changes"
         mock_request.assert_called_once_with("GET", url, json=None, headers={'Content-Type': 'application/json'}, auth=HTTPBasicAuth("bob", "12345"))
 
     @patch('requests.request')
     def test_postPurge(self, mock_request):
-        # Mock the POST _purge request
+        # This test checks the postPurge method
+        
+        # Mock the POST _purge request response
         purge_response = {"purged": {"foo": ["*"]}}
         mock_response = MagicMock()
         mock_response.json.return_value = purge_response
@@ -116,16 +138,22 @@ class TestWORK(unittest.TestCase):
         mock_response.raise_for_status = MagicMock()
         mock_request.return_value = mock_response
 
+        # Perform the postPurge request
         result = self.work.postPurge(["foo"])
 
+        # Assert that the result matches the expected purge response
         self.assertEqual(result, purge_response)
+        # Verify that the request was made with the correct parameters
         url = f"{self.work.sgHost}:{self.work.sgAdminPort}/{self.work.constructDbUrl()}/_purge"
         purge_data = {"foo": ["*"]}
         mock_request.assert_called_once_with("POST", url, json=purge_data, headers={'Content-Type': 'application/json'}, auth=HTTPBasicAuth(self.work.sgAdminUser, self.work.sgAdminPassword))
 
     @patch('requests.request')
     def test_openJsonFolder(self, mock_request):
+        # This test checks the openJsonFolder method, which processes JSON files and performs various operations
+        
         def side_effect(*args, **kwargs):
+            # This side_effect function mocks different responses based on the request type
             mock_response = MagicMock()
             mock_response.raise_for_status = MagicMock()
             
@@ -145,9 +173,10 @@ class TestWORK(unittest.TestCase):
 
         mock_request.side_effect = side_effect
 
+        # Execute the openJsonFolder method
         self.work.openJsonFolder()
 
-        # Check that the appropriate requests were made
+        # Define the expected calls to be made by the openJsonFolder method
         sgDbUrl = f"{self.work.sgHost}:{self.work.sgPort}/{self.work.sgDb}"
         sgAdminUrl = f"{self.work.sgHost}:{self.work.sgAdminPort}/{self.work.sgDb}"
         expected_calls = [
@@ -172,6 +201,8 @@ class TestWORK(unittest.TestCase):
             # PURGE
             unittest.mock.call("POST", f"{sgAdminUrl}/_purge", json={"foo": ["*"]}, headers={'Content-Type': 'application/json'}, auth=HTTPBasicAuth(self.work.sgAdminUser, self.work.sgAdminPassword))
         ]
+        
+        # Verify that all expected calls were made in any order
         mock_request.assert_has_calls(expected_calls, any_order=True)
 
 if __name__ == '__main__':
