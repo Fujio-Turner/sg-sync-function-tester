@@ -20,9 +20,9 @@ This script will:
 1. read a `config.json` file with your settings(usernames , URLs & commands)
 2. open a folder of individual JSON files: default folder `jsons`
 3. process each of the JSON file in the folder as HTTP [GET, PUT, DELETE, CHANGES, GET_ADMIN, PUT_ADMIN, DELETE_ADMIN , CHANGES_ADMIN and/or PURGE] against your SG endpoint to test your Sync Function
-4. will write the results into a log file as `failed` or `success` by HTTP type & timestamp
+4. write the results into a log file as `failed` or `success` by HTTP type & timestamp
 
-The script will do all the as different user(s) from the `config.json` file.
+The script will do all the above as different user(s) from the `config.json` file.
 
 ## REQUIREMENTS 
 - A Running Sync Gateway w/ one or more known Sync Gateway USERS (cbl user)
@@ -43,7 +43,7 @@ pip install requests
 **Step 3.** Run the Python code 
 
 ```sh
-python3 sg-sync-function-tester.py config.json
+python3 sg_sync_function_tester.py config.json
 ```
 
 **OUTPUT:** It will output a log file of the run: `sync_gateway_log_{date}_{time}.log`
@@ -97,9 +97,9 @@ Example usage in the `operations` list(sleeps for 3 seconds):
 You can copy and paste the `config.json` file and rename them to run tests. `example_config` folder has below examples.
 
 ```sh
-python3 sg-sync-function-tester.py 1.user_put-user_get.json
-python3 sg-sync-function-tester.py 2.user_put-user_changes.json
-python3 sg-sync-function-tester.py 3.admin_put-user_delete.json
+python3 sg_sync_function_tester.py 1.user_put-user_get.json
+python3 sg_sync_function_tester.py 2.user_put-user_changes.json
+python3 sg_sync_function_tester.py 3.admin_put-user_delete.json
 ```
 
 ## config.json
