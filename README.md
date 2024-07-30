@@ -12,10 +12,17 @@ I wrote this simple Python script to test the Sync Function of Sync Gateway with
 
 ## WHAT IT DOES
 
+<img src="img/sg_sync_function_tester_v2.png" alt="Project screenshot" width="787" height="380">
+
+
 This script will:
-1. read a folder of individual JSON files
-2. process each of the JSON file as HTTP [GET, PUT, DELETE, CHANGES, GET_ADMIN, PUT_ADMIN, DELETE_ADMIN , CHANGES_ADMIN and/or PURGE] against your SG endpoint to test your Sync Function
-3. do the above as different users
+
+1. read a `config.json` file with your settings(usernames , URLs & commands)
+2. open a folder of individual JSON files: default folder `jsons`
+3. process each of the JSON file in the folder as HTTP [GET, PUT, DELETE, CHANGES, GET_ADMIN, PUT_ADMIN, DELETE_ADMIN , CHANGES_ADMIN and/or PURGE] against your SG endpoint to test your Sync Function
+4. will write the results into a log file as `failed` or `success` by HTTP type & timestamp
+
+The script will do all the as different user(s) from the `config.json` file.
 
 ## REQUIREMENTS 
 - A Running Sync Gateway w/ one or more known Sync Gateway USERS (cbl user)
