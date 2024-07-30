@@ -1,3 +1,21 @@
 .DS_Store
 Pipfile
 Pipfile.lock
+
+# Ignore Python bytecode files
+*.pyc
+*.pyo
+__pycache__/
+
+# Ignore pytest cache
+.pytest_cache/
+
+# Ignore log files
+*.log
+
+# Ignore virtual environments
+venv/
+env/
+
+# Ignore other common files
+*.sqlite3
