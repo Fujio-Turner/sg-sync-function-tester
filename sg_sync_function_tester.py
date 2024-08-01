@@ -126,7 +126,6 @@ class WORK:
         result = self.httpRequest("POST", sgUrl, json_data=purgeData, is_admin=True)
         return result.json() if hasattr(result, 'json') else result
 
-    # Processes JSON files in the specified folder and performs operations on them
     def openJsonFolder(self):
         json_folder = self.jsonFolder
         processed_docs = []
@@ -150,11 +149,16 @@ class WORK:
                             time.sleep(sleep_time)
                             continue
 
-                        is_admin = operation.endswith("_ADMIN")
-                        op = operation.replace("_ADMIN", "")
-                        
+                        is_admin = "_ADMIN" in operation
+                        if is_admin:
+                            op, *rest = operation.split("_ADMIN")
+                            params = rest[0].split(":", 1)[1] if rest and ":" in rest[0] else ""
+                        else:
+                            op, *rest = operation.split(":")
+                            params = rest[0] if rest else ""
+
                         for user in self.sgTestUsers:
-                            sgUrl = f"{self.sgHost}:{self.sgPort}/{self.constructDbUrl()}/{doc_id}"
+                            sgUrl = f"{self.sgHost}:{self.sgPort if not is_admin else self.sgAdminPort}/{self.constructDbUrl()}/{doc_id}"
                             userName = user["userName"]
                             password = user["password"]
                             session = user["sgSession"]
@@ -193,7 +197,7 @@ class WORK:
                                     current_doc = self.httpRequest("GET", sgUrl, userName=userName, password=password, session=session, is_admin=is_admin)
                                     if current_doc and '_rev' in current_doc:
                                         rev = current_doc['_rev']
-                                        delete_url = f"{self.sgHost}:{self.sgPort}/{self.constructDbUrl()}/{doc_id}?rev={rev}"
+                                        delete_url = f"{self.sgHost}:{self.sgPort if not is_admin else self.sgAdminPort}/{self.constructDbUrl()}/{doc_id}?rev={rev}"
                                         result = self.httpRequest("DELETE", delete_url, userName=userName, password=password, session=session, is_admin=is_admin)
                                         status = "success" if result and result.get("ok") else "failed"
                                         self.logger.info(f"[{status}] - [DELETE] - [{'Admin' if is_admin else userName}] - DELETE result for [{doc_id}] - {json.dumps(result)}")
@@ -203,18 +207,20 @@ class WORK:
                                     self.logger.error(f"[failed] - [DELETE] - [{'Admin' if is_admin else userName}] - Error in HTTP DELETE for [{doc_id}] - {str(e)}")
                                     self.logger.info(f"[failed] - [DELETE] - [{'Admin' if is_admin else userName}] - DELETE result for [{doc_id}] - null")
 
-                            elif op.startswith("CHANGES"):
+                            elif op == "CHANGES":
                                 try:
-                                    channels = None
-                                    if ":" in op:
-                                        channels = op.split(":", 1)[1]
-                                    result = self.getChangesFeed(userName=userName, password=password, session=session, is_admin=is_admin, channels=channels)
+                                    channels = params if params else None
+                                    sgUrl = f"{self.sgHost}:{self.sgPort if not is_admin else self.sgAdminPort}/{self.constructDbUrl()}/_changes"
+                                    if channels:
+                                        sgUrl += f"?filter=sync_gateway/bychannel&channels={channels}"
+                                    result = self.httpRequest("GET", sgUrl, userName=userName, password=password, session=session, is_admin=is_admin)
                                     status = "success" if result else "failed"
                                     result_count = len(result.get("results", [])) if result else 0
-                                    self.logger.info(f"[{status}] - [CHANGES] - [{'Admin' if is_admin else userName}] - Changes feed result for [{doc_id}], rows: {result_count} - {json.dumps(result)}")
+                                    filter_flag = "true" if channels else "false"
+                                    self.logger.info(f"[{status}] - [CHANGES] - [{'Admin' if is_admin else userName}] - Changes feed result for [{doc_id}], channelFilter:{filter_flag}, channels:{channels if channels else 'None'}, rows: {result_count} - {json.dumps(result)}")
                                 except requests.RequestException as e:
                                     self.logger.error(f"[failed] - [CHANGES] - [{'Admin' if is_admin else userName}] - Error in HTTP CHANGES for [{doc_id}] - {str(e)}")
-                                    self.logger.info(f"[failed] - [CHANGES] - [{'Admin' if is_admin else userName}] - Changes feed result for [{doc_id}], rows: 0 - null")
+                                    self.logger.info(f"[failed] - [CHANGES] - [{'Admin' if is_admin else userName}] - Changes feed result for [{doc_id}], channelFilter:false, channels:None, rows: 0 - null")
 
                             elif op == "PURGE":
                                 try:
@@ -235,6 +241,9 @@ class WORK:
                                 except requests.RequestException as e:
                                     self.logger.error(f"[failed] - [GET_RAW] - [Admin] - Error in HTTP GET_RAW for [{doc_id}] - {str(e)}")
                                     self.logger.info(f"[failed] - [GET_RAW] - [Admin] - GET_RAW result for [{doc_id}] - null")
+
+
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
