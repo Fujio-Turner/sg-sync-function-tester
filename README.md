@@ -153,5 +153,7 @@ Here is a link to understand what the Sync Function can and can not do.
 7. **Scopes and Collection**: In the `config.json` just pass in non-default(`_default`) value for `sgDbScope` and `sgDbCollection` to test scopes and collection Sync Functions.
 8. **Changes Channel(s) Filter**: Add the channel(s) you want to filter by in the changes operation like this:`CHANGES:bob` .
 
+Release:
+1.5.0 - Try it out and let me know.
 
 Works on My Computer - Tested & Certified ;-)
