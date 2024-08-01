@@ -136,7 +136,7 @@ Here is a link to understand what the Sync Function can and can not do.
 - [Offical Docs for Sync Gateway's Sync Function](https://docs.couchbase.com/sync-gateway/current/sync-function.html#ex-sync-function)
 
 #### Sample Sync Functions:
-- [Github.com - Sync Function with Security](https://github.com/Fujio-Turner/sg-sync-function-tester/blob/main/example_sync_functions/3.sync_function_run.js)
+- [Github.com - Sync Function with Security](example_sync_functions/3.sync_function_run.js)
 - [Github.com - sync_gateway](https://github.com/couchbase/sync_gateway/blob/main/examples/database_config/sync-function.json)
 - [Github.com - travel-sample](https://github.com/couchbaselabs/mobile-travel-sample/blob/master/sync-gateway-config-travelsample-docker.json#L65)
 - [Github.com - todo](https://github.com/couchbaselabs/mobile-training-todo/blob/release/helium/docker/sg-setup/config/sync-function.json#L7)
