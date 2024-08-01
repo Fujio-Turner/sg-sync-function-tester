@@ -18,9 +18,11 @@ I wrote this simple Python script to test the Sync Function of Sync Gateway with
 This script will:
 
 1. read a `config.json` file with your settings(usernames , URLs & commands)
-2. open a folder of individual JSON files: default folder `jsons`
+2. opens a folder of individual JSON files: default folder `jsons`
 3. process each of the JSON file in the folder as HTTP [GET, PUT, DELETE, CHANGES, GET_ADMIN, PUT_ADMIN, DELETE_ADMIN , CHANGES_ADMIN and/or PURGE] against your SG endpoint to test your Sync Function
-4. write the results into a log file as `failed` or `success` by HTTP type & timestamp
+4. writes the results into a log file as `failed` or `success` by HTTP type & timestamp
+
+**NOTE:** a `failed` PUT might be a good thing as the Sync Function is denying a particular write.
 
 The script will do all the above as different user(s) from the `config.json` file.
 
@@ -101,6 +103,7 @@ python3 sg_sync_function_tester.py 1.user_put-user_get.json
 python3 sg_sync_function_tester.py 2.user_put-user_changes.json
 python3 sg_sync_function_tester.py 3.admin_put-user_delete.json
 ```
+**PRO TIP** The config `3.admin_put-user_delete.json` is a great way to see if the user can delete "READ-ONLY" documents.
 
 ## config.json
 
