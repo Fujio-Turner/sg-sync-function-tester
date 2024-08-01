@@ -7,7 +7,7 @@ function(doc, oldDoc) {
         throw({ forbidden: "error: invalid document ID format" });
     }
 
-    if (doc.deleted) {
+    if (doc.deleted && doc.deleted == true) {
 
         requireRole(["editor", "admin"]);
 

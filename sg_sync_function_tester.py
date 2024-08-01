@@ -108,7 +108,8 @@ class WORK:
             response.raise_for_status()
             return response.json() if response.text else None
         except requests.RequestException as e:
-            self.logger.error(f"Error in HTTP {method}: {e}")
+            if self.debug == True:
+                self.logger.error(f"Error in HTTP {method}: {e}")
             return None
 
     # Retrieves the changes feed from Sync Gateway

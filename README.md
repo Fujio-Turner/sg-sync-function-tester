@@ -136,7 +136,7 @@ Here is a link to understand what the Sync Function can and can not do.
 - [Offical Docs for Sync Gateway's Sync Function](https://docs.couchbase.com/sync-gateway/current/sync-function.html#ex-sync-function)
 
 #### Sample Sync Functions:
-- [Github.com - basic-security](https://github.com/Fujio-Turner/sg-sync-function-tester/blob/main/example_sync_functions/1.basic-security.js)
+- [Github.com - Sync Function with Security](https://github.com/Fujio-Turner/sg-sync-function-tester/blob/main/example_sync_functions/3.sync_function_run.js)
 - [Github.com - sync_gateway](https://github.com/couchbase/sync_gateway/blob/main/examples/database_config/sync-function.json)
 - [Github.com - travel-sample](https://github.com/couchbaselabs/mobile-travel-sample/blob/master/sync-gateway-config-travelsample-docker.json#L65)
 - [Github.com - todo](https://github.com/couchbaselabs/mobile-training-todo/blob/release/helium/docker/sg-setup/config/sync-function.json#L7)
@@ -153,7 +153,5 @@ Here is a link to understand what the Sync Function can and can not do.
 7. **Scopes and Collection**: In the `config.json` just pass in non-default(`_default`) value for `sgDbScope` and `sgDbCollection` to test scopes and collection Sync Functions.
 8. **Changes Channel(s) Filter**: Add the channel(s) you want to filter by in the changes operation like this:`CHANGES:bob` .
 
-Release:
-1.5.0 - Try it out and let me know.
 
 Works on My Computer - Tested & Certified ;-)

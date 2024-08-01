@@ -13,16 +13,15 @@
     "jsonFolder": "jsons",  
     "logPathToWriteTo": "sync_gateway_log",
     "debug": false,
-    "operations":[
-                    "GET",
+    "operations":[  
                     "PUT",
+                    "GET",
                     "DELETE",
                     "CHANGES",
-                    "CHANGES:bob",
-                    "GET_ADMIN",
                     "PUT_ADMIN",
+                    "GET_ADMIN",
                     "DELETE_ADMIN",
-                    "CHANGES_ADMIN",
+                    "CHANGES_ADMIN:bob",
                     "SLEEP:3",
                     "GET_RAW",
                     "PURGE"
