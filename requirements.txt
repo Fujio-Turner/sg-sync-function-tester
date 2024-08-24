@@ -1,12 +1,6 @@
-# requirements.txt
-
-# Python version
-python>=3.8  # Adjust this to your minimum required version
-
 # HTTP library
-requests==2.28.1
+requests
 
 # Testing framework
-pytest==7.1.2
-
+pytest
 # Add any other dependencies here
