@@ -89,6 +89,7 @@ class TestWORK(unittest.TestCase):
             headers={'Content-Type': 'application/json'},
             auth=HTTPBasicAuth("bob", "12345")
         )
+
     @patch('requests.request')
     def test_getChangesFeed(self, mock_request):
         changes_feed = {
@@ -101,10 +102,13 @@ class TestWORK(unittest.TestCase):
         mock_response.raise_for_status = MagicMock()
         mock_request.return_value = mock_response
 
-        result = self.work.getChangesFeed(userName="bob", password="12345", channels="bob")
+        result = self.work.getChangesFeed(
+            userName="bob", password="12345", channels="bob"
+        )
 
         self.assertEqual(result, changes_feed)
-        url = f"{self.work.sgHost}:{self.work.sgPort}/{self.work.constructDbUrl()}/_changes?filter=sync_gateway/bychannel&channels=bob"
+        url = (f"{self.work.sgHost}:{self.work.sgPort}/{self.work.constructDbUrl()}/"
+               f"_changes?filter=sync_gateway/bychannel&channels=bob")
         mock_request.assert_called_once_with(
             "GET", url,
             json=None, headers={'Content-Type': 'application/json'},
@@ -123,7 +127,8 @@ class TestWORK(unittest.TestCase):
         result = self.work.postPurge(["foo"])
 
         self.assertEqual(result, purge_response)
-        url = f"{self.work.sgHost}:{self.work.sgAdminPort}/{self.work.constructDbUrl()}/_purge"
+        url = (f"{self.work.sgHost}:{self.work.sgAdminPort}/"
+               f"{self.work.constructDbUrl()}/_purge")
         purge_data = {"foo": ["*"]}
         mock_request.assert_called_once_with(
             "POST", url,
@@ -139,9 +144,13 @@ class TestWORK(unittest.TestCase):
             mock_response.raise_for_status = MagicMock()
             
             if args[0] == "GET":
-                mock_response.json.return_value = {"_id": "foo", "_rev": "1-a", "channels": ["bob"]}
+                mock_response.json.return_value = {
+                    "_id": "foo", "_rev": "1-a", "channels": ["bob"]
+                }
             elif args[0] == "PUT":
-                mock_response.json.return_value = {"ok": True, "id": "foo", "rev": "1-a"}
+                mock_response.json.return_value = {
+                    "ok": True, "id": "foo", "rev": "1-a"
+                }
             elif args[0] == "DELETE":
                 mock_response.json.return_value = {"ok": True}
             elif args[0] == "POST" and "/_purge" in args[1]:
@@ -199,7 +208,8 @@ class TestWORK(unittest.TestCase):
                 auth=HTTPBasicAuth(self.work.sgAdminUser, self.work.sgAdminPassword)
             ),
             unittest.mock.call(
-                "GET", f"{sgAdminUrl}/_changes?filter=sync_gateway/bychannel&channels=bob",
+                "GET",
+                f"{sgAdminUrl}/_changes?filter=sync_gateway/bychannel&channels=bob",
                 json=None, headers={'Content-Type': 'application/json'},
                 auth=HTTPBasicAuth(self.work.sgAdminUser, self.work.sgAdminPassword)
             ),
