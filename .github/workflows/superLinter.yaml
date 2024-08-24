@@ -27,4 +27,6 @@ jobs:
         # VALIDATE_JAVA: false
         # VALIDATE_DOCKERFILE: true
         # VALIDATE_YAML: true
+
         # VALIDATE_BASH: true
+        FILTER_REGEX_EXCLUDE: (example_configs/.*|example_functions/.*|img/.*)
