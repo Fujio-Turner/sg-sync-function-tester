@@ -4,9 +4,12 @@ import json
 import os
 import sys
 from requests.auth import HTTPBasicAuth
+sys.path.insert(
+    0,
+    os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                 '..'))
+)
 from sg_sync_function_tester import Work
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 
 class TestWORK(unittest.TestCase):
