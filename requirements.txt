@@ -1,0 +1,12 @@
+# requirements.txt
+
+# Python version
+python>=3.11.6  # Adjust this to your minimum required version
+
+# HTTP library
+requests
+
+# Testing framework
+pytest
+
+# Add any other dependencies here
