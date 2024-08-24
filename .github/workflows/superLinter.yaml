@@ -1,0 +1,30 @@
+name: Super Linter
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  super-linter:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run Super Linter
+      uses: github/super-linter@v4
+      env:
+        DEFAULT_BRANCH: main
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # Uncomment the following lines to enable linter rules for specific languages
+        # VALIDATE_ALL_CODEBASE: true
+        # VALIDATE_JAVASCRIPT_STANDARD: false
+        VALIDATE_PYTHON_FLAKE8: true
+        # VALIDATE_TYPESCRIPT_STANDARD: false
+        # VALIDATE_JAVA: false
+        # VALIDATE_DOCKERFILE: true
+        # VALIDATE_YAML: true
+        # VALIDATE_BASH: true
