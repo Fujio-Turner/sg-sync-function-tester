@@ -72,7 +72,6 @@ class WORK:
         # Store the file handler so it can be closed later
         self.file_handler = file_handler
 
-
     # Closes the log file
     def closeLogFile(self):
         if hasattr(self, 'file_handler'):
@@ -108,7 +107,7 @@ class WORK:
             response.raise_for_status()
             return response.json() if response.text else None
         except requests.RequestException as e:
-            if self.debug == True:
+            if self.debug:
                 self.logger.error(f"Error in HTTP {method}: {e}")
             return None
 
@@ -167,7 +166,8 @@ class WORK:
                                 try:
                                     result = self.httpRequest("GET", sgUrl, userName=userName, password=password, session=session, is_admin=is_admin)
                                     status = "success" if result else "failed"
-                                    self.logger.info(f"[{status}] - [GET] - [{'Admin' if is_admin else userName}] - GET result for [{doc_id}] - {json.dumps(result) if result else 'null'}")
+                                    self.logger.info(f"[{status}] - [GET] - [{'Admin' if is_admin else userName}] - GET result for [{doc_id}] - "
+                                                     f"{json.dumps(result) if result else 'null'}")
                                     if result:
                                         rev = result.get('_rev')
                                 except requests.RequestException:
@@ -184,7 +184,8 @@ class WORK:
                                     json_data['dateTimeStamp'] = datetime.now().isoformat()
                                     result = self.httpRequest("PUT", sgUrl, json_data=json_data, userName=userName, password=password, session=session, is_admin=is_admin)
                                     status = "success" if result and result.get("ok") else "failed"
-                                    self.logger.info(f"[{status}] - [PUT] - [{'Admin' if is_admin else userName}] - PUT result for [{doc_id}] - {json.dumps(result)}")
+                                    self.logger.info(f"[{status}] - [PUT] - [{'Admin' if is_admin else userName}] - PUT result for [{doc_id}] - "
+                                                     f"{json.dumps(result)}")
                                     if result and result.get("rev"):
                                         rev = result["rev"]
                                 except requests.RequestException as e:
@@ -200,9 +201,11 @@ class WORK:
                                         delete_url = f"{self.sgHost}:{self.sgPort if not is_admin else self.sgAdminPort}/{self.constructDbUrl()}/{doc_id}?rev={rev}"
                                         result = self.httpRequest("DELETE", delete_url, userName=userName, password=password, session=session, is_admin=is_admin)
                                         status = "success" if result and result.get("ok") else "failed"
-                                        self.logger.info(f"[{status}] - [DELETE] - [{'Admin' if is_admin else userName}] - DELETE result for [{doc_id}] - {json.dumps(result)}")
+                                        self.logger.info(f"[{status}] - [DELETE] - [{'Admin' if is_admin else userName}] - DELETE result for [{doc_id}] - "
+                                                         f"{json.dumps(result)}")
                                     else:
-                                        self.logger.warning(f"[failed] - [DELETE] - [{'Admin' if is_admin else userName}] - Unable to delete [{doc_id}] - Document not found or no revision available")
+                                        self.logger.warning(f"[failed] - [DELETE] - [{'Admin' if is_admin else userName}] - Unable to delete [{doc_id}] - "
+                                                            "Document not found or no revision available")
                                 except requests.RequestException as e:
                                     self.logger.error(f"[failed] - [DELETE] - [{'Admin' if is_admin else userName}] - Error in HTTP DELETE for [{doc_id}] - {str(e)}")
                                     self.logger.info(f"[failed] - [DELETE] - [{'Admin' if is_admin else userName}] - DELETE result for [{doc_id}] - null")
@@ -217,10 +220,13 @@ class WORK:
                                     status = "success" if result else "failed"
                                     result_count = len(result.get("results", [])) if result else 0
                                     filter_flag = "true" if channels else "false"
-                                    self.logger.info(f"[{status}] - [CHANGES] - [{'Admin' if is_admin else userName}] - Changes feed result for [{doc_id}], channelFilter:{filter_flag}, channels:{channels if channels else 'None'}, rows: {result_count} - {json.dumps(result)}")
+                                    self.logger.info(f"[{status}] - [CHANGES] - [{'Admin' if is_admin else userName}] - Changes feed result for [{doc_id}], "
+                                                     f"channelFilter:{filter_flag}, channels:{channels if channels else 'None'}, rows: {result_count} - "
+                                                     f"{json.dumps(result)}")
                                 except requests.RequestException as e:
                                     self.logger.error(f"[failed] - [CHANGES] - [{'Admin' if is_admin else userName}] - Error in HTTP CHANGES for [{doc_id}] - {str(e)}")
-                                    self.logger.info(f"[failed] - [CHANGES] - [{'Admin' if is_admin else userName}] - Changes feed result for [{doc_id}], channelFilter:false, channels:None, rows: 0 - null")
+                                    self.logger.info(f"[failed] - [CHANGES] - [{'Admin' if is_admin else userName}] - Changes feed result for [{doc_id}], "
+                                                     "channelFilter:false, channels:None, rows: 0 - null")
 
                             elif op == "PURGE":
                                 try:
@@ -237,12 +243,11 @@ class WORK:
                                     raw_url = f"{self.sgHost}:{self.sgAdminPort}/{self.constructDbUrl()}/_raw/{doc_id}"
                                     result = self.httpRequest("GET", raw_url, is_admin=True)
                                     status = "success" if result else "failed"
-                                    self.logger.info(f"[{status}] - [GET_RAW] - [Admin] - GET_RAW result for [{doc_id}] - {json.dumps(result) if result else 'null'}")
+                                    self.logger.info(f"[{status}] - [GET_RAW] - [Admin] - GET_RAW result for [{doc_id}] - "
+                                                     f"{json.dumps(result) if result else 'null'}")
                                 except requests.RequestException as e:
                                     self.logger.error(f"[failed] - [GET_RAW] - [Admin] - Error in HTTP GET_RAW for [{doc_id}] - {str(e)}")
                                     self.logger.info(f"[failed] - [GET_RAW] - [Admin] - GET_RAW result for [{doc_id}] - null")
-
-
 
 
 if __name__ == "__main__":
