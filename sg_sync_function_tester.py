@@ -8,7 +8,8 @@ import sys
 import time
 
 
-# The WORK class represents the main functionality for interacting with Sync Gateway to test the Sync Function
+# The WORK class represents the main functionality for interacting with
+# Sync Gateway to test the Sync Function
 class WORK:
     # Default configuration values
     debug = False
@@ -30,7 +31,8 @@ class WORK:
         self.readConfig(config_file)
         self.setupLogging()
 
-    # Reads the configuration from the specified file and sets up the object's attributes
+    # Reads the configuration from the specified file
+    # and sets up the object's attributes
     def readConfig(self, config_file):
         try:
             with open(config_file, "r") as f:
@@ -49,26 +51,27 @@ class WORK:
         self.sgDbCollection = config.get("sgDbCollection", self.sgDbCollection)
         self.sgTestUsers = config.get("sgTestUsers", self.sgTestUsers)
         self.sgAdminUser = config.get("sgAdminUser", self.sgAdminUser)
-        self.sgAdminPassword = config.get("sgAdminPassword", self.sgAdminPassword)
+        self.sgAdminPassword = config.get(
+            "sgAdminPassword", self.sgAdminPassword
+        )
         self.jsonFolder = config.get("jsonFolder", self.jsonFolder)
         self.debug = config.get("debug", self.debug)
         self.operations = config.get("operations", self.operations)
-
-    # Sets up logging for the application with ISO 8601 timestamps
-    def setupLogging(self):
+        
+    def setupLogging(self):  # Sets up logging for the application with ISO 8601 timestamps
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         log_filename = f"{self.sgLogName}_{timestamp}.log"
-        
+
         self.logger = logging.getLogger()
         self.logger.setLevel(logging.DEBUG if self.debug else logging.INFO)
-        
+
         formatter = logging.Formatter("%(asctime)s.%(msecs)03d - %(levelname)s - %(message)s", datefmt='%Y-%m-%dT%H:%M:%S')
-        
+
         file_handler = logging.FileHandler(log_filename)
         file_handler.setFormatter(formatter)
-        
+
         self.logger.addHandler(file_handler)
-        
+
         # Store the file handler so it can be closed later
         self.file_handler = file_handler
 
@@ -91,7 +94,7 @@ class WORK:
             headers = {"Content-Type": "application/json"}
             if session:
                 headers["Cookie"] = f"SyncGatewaySession={session}"
-            
+
             if is_admin:
                 auth = HTTPBasicAuth(self.sgAdminUser, self.sgAdminPassword)
                 url = url.replace(f":{self.sgPort}/", f":{self.sgAdminPort}/")
@@ -99,11 +102,11 @@ class WORK:
                 auth = HTTPBasicAuth(userName, password) if userName and password else None
 
             response = requests.request(method, url, json=json_data, headers=headers, auth=auth)
-            
+
             # Handle the case where response might be a dictionary (for testing purposes)
             if isinstance(response, dict):
                 return response
-            
+
             response.raise_for_status()
             return response.json() if response.text else None
         except requests.RequestException as e:
@@ -260,9 +263,7 @@ if __name__ == "__main__":
     work.openJsonFolder()
     work.closeLogFile()
 
-
-
-'''
-HOW TO RUN THE UNIT TEST
-python3 -m unittest discover -s test -p "test_sg_sync_function_tester.py"
-'''
+    '''
+    HOW TO RUN THE UNIT TEST
+    python3 -m unittest discover -s test -p "test_sg_sync_function_tester.py"
+    '''
