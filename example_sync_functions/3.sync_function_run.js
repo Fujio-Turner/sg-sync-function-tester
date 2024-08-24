@@ -2,7 +2,7 @@ function(doc, oldDoc) {
 
     let a;
     try {
-        a = doc._id.split(":");
+        a = doc._id.split("-");
     } catch (error) {
         throw({ forbidden: "error: invalid document ID format" });
     }
