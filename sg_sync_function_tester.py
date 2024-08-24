@@ -420,8 +420,8 @@ class WORK:
                                     self.logger.info(
                                         f"[failed] - [GET_RAW] - [Admin] - "
                                         f"GET_RAW result for [{doc_id}] - null"
-
                                     )
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
