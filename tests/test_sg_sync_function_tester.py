@@ -2,9 +2,12 @@ import unittest
 from unittest.mock import patch, MagicMock
 import json
 import os
+import sys
 from requests.auth import HTTPBasicAuth
-from ..sg_sync_function_tester import WORK
 
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from sg_sync_function_tester import Work
 
 class TestWORK(unittest.TestCase):
 
@@ -40,7 +43,7 @@ class TestWORK(unittest.TestCase):
         self.sample_doc = {"_id": "foo", "channels": ["bob"]}
         with open(os.path.join(self.json_folder, 'foo.json'), 'w') as f:
             json.dump(self.sample_doc, f)
-        self.work = WORK(self.config_file)
+        self.work = Work(self.config_file)
 
     def tearDown(self):
         os.remove(self.config_file)

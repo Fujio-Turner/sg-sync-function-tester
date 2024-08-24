@@ -11,7 +11,7 @@ import time
 # Sync Gateway to test the Sync Function
 
 
-class WORK:
+class Work():
 
     # Default configuration values
     debug = False
@@ -429,11 +429,6 @@ if __name__ == "__main__":
         sys.exit(1)
 
     config_file = sys.argv[1]
-    work = WORK(config_file)
-    work.openJsonFolder()
-    work.closeLogFile()
-
-    '''
-    HOW TO RUN THE UNIT TEST
-    python3 -m unittest discover -s test -p "test_sg_sync_function_tester.py"
-    '''
+    workAll = Work(config_file)
+    workAll.openJsonFolder()
+    workAll.closeLogFile()
