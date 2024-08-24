@@ -248,7 +248,7 @@ class WORK:
                                     )
                                     if current_doc and '_rev' in current_doc:
                                         # Update the revision if the document exists
-                                        json_data['_rev'] = current_doc['_rev']                                
+                                        json_data['_rev'] = current_doc['_rev']
 
                                     json_data['dateTimeStamp'] = datetime.now().isoformat()
                                     result = self.httpRequest(
@@ -420,8 +420,8 @@ class WORK:
                                     self.logger.info(
                                         f"[failed] - [GET_RAW] - [Admin] - "
                                         f"GET_RAW result for [{doc_id}] - null"
-                                    )
 
+                                    )
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
