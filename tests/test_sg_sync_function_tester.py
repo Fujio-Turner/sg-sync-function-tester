@@ -148,7 +148,6 @@ class TestWORK(unittest.TestCase):
         def side_effect(*args, **kwargs):
             mock_response = MagicMock()
             mock_response.raise_for_status = MagicMock()
-            
             if args[0] == "GET":
                 mock_response.json.return_value = {
                     "_id": "foo", "_rev": "1-a", "channels": ["bob"]
@@ -163,7 +162,6 @@ class TestWORK(unittest.TestCase):
                 mock_response.json.return_value = {"purged": {"foo": ["*"]}}
             else:
                 mock_response.json.return_value = {}
-            
             mock_response.text = json.dumps(mock_response.json.return_value)
             return mock_response
 
