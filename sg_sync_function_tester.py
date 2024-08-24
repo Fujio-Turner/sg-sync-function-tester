@@ -2,15 +2,12 @@ import json
 import os
 import requests
 from requests.auth import HTTPBasicAuth
-from datetime import datetime
 import logging
 import sys
 import time
 
-
 # The WORK class represents the main functionality for interacting with Sync Gateway to test the Sync Function
 class WORK:
-    # Default configuration values
     debug = False
     sgHost = "http://localhost"
     sgPort = "4984"
@@ -72,7 +69,6 @@ class WORK:
         # Store the file handler so it can be closed later
         self.file_handler = file_handler
 
-
     # Closes the log file
     def closeLogFile(self):
         if hasattr(self, 'file_handler'):
@@ -108,7 +104,7 @@ class WORK:
             response.raise_for_status()
             return response.json() if response.text else None
         except requests.RequestException as e:
-            if self.debug == True:
+            if self.debug:
                 self.logger.error(f"Error in HTTP {method}: {e}")
             return None
 
@@ -139,7 +135,8 @@ class WORK:
                     rev = None
                     for operation in self.operations:
                         if operation.startswith("SLEEP"):
-                            sleep_time = 1  # Default sleep time
+
+                            sleep_time = 1
                             if ":" in operation:
                                 try:
                                     sleep_time = int(operation.split(":")[1])
@@ -242,9 +239,6 @@ class WORK:
                                     self.logger.error(f"[failed] - [GET_RAW] - [Admin] - Error in HTTP GET_RAW for [{doc_id}] - {str(e)}")
                                     self.logger.info(f"[failed] - [GET_RAW] - [Admin] - GET_RAW result for [{doc_id}] - null")
 
-
-
-
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python3 sg_sync_function_tester.py <config_file>")
@@ -254,10 +248,3 @@ if __name__ == "__main__":
     work = WORK(config_file)
     work.openJsonFolder()
     work.closeLogFile()
-
-
-
-'''
-HOW TO RUN THE UNIT TEST
-python3 -m unittest discover -s test -p "test_sg_sync_function_tester.py"
-'''
