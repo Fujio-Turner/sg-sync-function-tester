@@ -3,7 +3,7 @@ from unittest.mock import patch, MagicMock
 import json
 import os
 from requests.auth import HTTPBasicAuth
-from sg_sync_function_tester.sg_sync_function_tester import WORK
+from ..sg_sync_function_tester import WORK
 
 
 class TestWORK(unittest.TestCase):
