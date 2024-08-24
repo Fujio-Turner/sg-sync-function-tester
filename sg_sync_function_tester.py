@@ -63,7 +63,7 @@ class WORK:
         self.operations = config.get("operations", self.operations)
 
     # Sets up logging for the application with ISO 8601 timestamps
-    def setupLogging(self):  
+    def setupLogging(self):
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         log_filename = f"{self.sgLogName}_{timestamp}.log"
 

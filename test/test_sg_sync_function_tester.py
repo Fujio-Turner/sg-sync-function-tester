@@ -2,7 +2,6 @@ import unittest
 from unittest.mock import patch, MagicMock
 import json
 import os
-import sys
 from requests.auth import HTTPBasicAuth
 from sg_sync_function_tester.sg_sync_function_tester import WORK
 
@@ -25,7 +24,11 @@ class TestWORK(unittest.TestCase):
             "jsonFolder": "jsons",
             "logPathToWriteTo": "sync_gateway_log",
             "debug": False,
-            "operations": ["GET", "PUT", "DELETE", "CHANGES", "GET_ADMIN", "PUT_ADMIN", "DELETE_ADMIN", "CHANGES_ADMIN:bob", "SLEEP:3", "GET_RAW", "PURGE"]
+            "operations": [
+                "GET", "PUT", "DELETE", "CHANGES", "GET_ADMIN", "PUT_ADMIN",
+                "DELETE_ADMIN", "CHANGES_ADMIN:bob", "SLEEP:3", "GET_RAW",
+                "PURGE"
+            ]
         }
         
         self.config_file = 'test_config.json'
@@ -37,8 +40,7 @@ class TestWORK(unittest.TestCase):
         self.sample_doc = {"_id": "foo", "channels": ["bob"]}
         with open(os.path.join(self.json_folder, 'foo.json'), 'w') as f:
             json.dump(self.sample_doc, f)
-
-        self.work = WORK(self.config_file)
+        self.work = WORK(self.config_file)    
 
     def tearDown(self):
         os.remove(self.config_file)
@@ -60,7 +62,12 @@ class TestWORK(unittest.TestCase):
         result = self.work.httpRequest("GET", url, userName="bob", password="12345")
 
         self.assertEqual(result, self.sample_doc)
-        mock_request.assert_called_once_with("GET", url, json=None, headers={'Content-Type': 'application/json'}, auth=HTTPBasicAuth("bob", "12345"))
+        mock_request.assert_called_once_with(
+            "GET", url,
+            json=None,
+            headers={'Content-Type': 'application/json'},
+            auth=HTTPBasicAuth("bob", "12345")
+        )
 
     @patch('requests.request')
     def test_httpRequest_put(self, mock_request):
@@ -74,7 +81,12 @@ class TestWORK(unittest.TestCase):
         result = self.work.httpRequest("PUT", url, json_data=self.sample_doc, userName="bob", password="12345")
 
         self.assertEqual(result, {"ok": True, "id": "foo", "rev": "1-a"})
-        mock_request.assert_called_once_with("PUT", url, json=self.sample_doc, headers={'Content-Type': 'application/json'}, auth=HTTPBasicAuth("bob", "12345"))
+        mock_request.assert_called_once_with(
+            "PUT", url,
+            json=self.sample_doc,
+            headers={'Content-Type': 'application/json'},
+            auth=HTTPBasicAuth("bob", "12345")
+        )
 
     @patch('requests.request')
     def test_getChangesFeed(self, mock_request):
@@ -108,7 +120,12 @@ class TestWORK(unittest.TestCase):
         self.assertEqual(result, purge_response)
         url = f"{self.work.sgHost}:{self.work.sgAdminPort}/{self.work.constructDbUrl()}/_purge"
         purge_data = {"foo": ["*"]}
-        mock_request.assert_called_once_with("POST", url, json=purge_data, headers={'Content-Type': 'application/json'}, auth=HTTPBasicAuth(self.work.sgAdminUser, self.work.sgAdminPassword))
+        mock_request.assert_called_once_with(
+            "POST", url,
+            json=purge_data,
+            headers={'Content-Type': 'application/json'},
+            auth=HTTPBasicAuth(self.work.sgAdminUser, self.work.sgAdminPassword)
+        )
 
     @patch('requests.request')
     def test_openJsonFolder(self, mock_request):
@@ -155,7 +172,10 @@ class TestWORK(unittest.TestCase):
         self.assertEqual(self.work.constructDbUrl(), "sync_gateway")
         self.work.sgDbScope = "scope1"
         self.work.sgDbCollection = "collection1"
-        self.assertEqual(self.work.constructDbUrl(), "sync_gateway.scope1.collection1")
+        self.assertEqual(
+            self.work.constructDbUrl(),
+            "sync_gateway.scope1.collection1"
+        )
 
 
 if __name__ == '__main__':
