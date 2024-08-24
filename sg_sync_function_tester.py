@@ -130,7 +130,7 @@ class WORK:
                 auth=auth
             )
 
-            # Handle the case where response might 
+            # Handle the case where response might
             # be a dictionary (for testing purposes)
             if isinstance(response, dict):
                 return response
@@ -140,27 +140,21 @@ class WORK:
         except requests.RequestException as e:
             if self.debug:
                 self.logger.error(f"Error in HTTP {method}: {e}")
-            return None
+        return None
 
     # Retrieves the changes feed from Sync Gateway
     def getChangesFeed(
-        self,
-        userName="",
-        password="",
-        session="",
-        is_admin=False,
-        channels=None
+        self, userName="",
+        password="", session="",
+        is_admin=False, channels=None
     ):
         sgUrl = f"{self.sgHost}:{self.sgPort}/{self.sgDb}/_changes"
         if channels:
             sgUrl += f"?filter=sync_gateway/bychannel&channels={channels}"
         return self.httpRequest(
-            "GET",
-            sgUrl,
-            userName=userName,
-            password=password,
-            session=session,
-            is_admin=is_admin
+            "GET", sgUrl,
+            userName=userName, password=password,
+            session=session, is_admin=is_admin
         )
 
     # Performs a purge operation on the specified document IDs
@@ -168,10 +162,8 @@ class WORK:
         sgUrl = f"{self.sgHost}:{self.sgAdminPort}/{self.sgDb}/_purge"
         purgeData = {docId: ["*"] for docId in docIds}
         result = self.httpRequest(
-            "POST",
-            sgUrl,
-            json_data=purgeData,
-            is_admin=True
+            "POST", sgUrl,
+            json_data=purgeData, is_admin=True
         )
         return result.json() if hasattr(result, 'json') else result
 
@@ -301,12 +293,9 @@ class WORK:
                                             f"{self.constructDbUrl()}/{doc_id}?rev={rev}"
                                         )
                                         result = self.httpRequest(
-                                            "DELETE",
-                                            delete_url,
-                                            userName=userName,
-                                            password=password,
-                                            session=session,
-                                            is_admin=is_admin
+                                            "DELETE", delete_url,
+                                            userName=userName, password=password,
+                                            session=session, is_admin=is_admin
                                         )
                                         status = "success" if result and result.get("ok") else "failed"
                                         self.logger.info(
