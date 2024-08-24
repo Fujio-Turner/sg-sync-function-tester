@@ -265,5 +265,4 @@ if __name__ == "__main__":
 '''
 HOW TO RUN THE UNIT TEST
 python3 -m unittest discover -s test -p "test_sg_sync_function_tester.py"
-
 '''
