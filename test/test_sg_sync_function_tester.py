@@ -3,7 +3,6 @@ from unittest.mock import patch, MagicMock
 import json
 import os
 import sys
-from datetime import datetime
 from requests.auth import HTTPBasicAuth
 
 # Add the root directory to the sys.path to allow imports
@@ -11,8 +10,9 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 from sg_sync_function_tester import WORK
 
+
 class TestWORK(unittest.TestCase):
-    
+     
     def setUp(self):
         self.config = {
             "sgHost": "http://localhost",
@@ -160,6 +160,7 @@ class TestWORK(unittest.TestCase):
         self.work.sgDbScope = "scope1"
         self.work.sgDbCollection = "collection1"
         self.assertEqual(self.work.constructDbUrl(), "sync_gateway.scope1.collection1")
+
 
 if __name__ == '__main__':
     unittest.main()
