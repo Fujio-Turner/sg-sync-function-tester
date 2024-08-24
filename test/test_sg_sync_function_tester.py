@@ -7,7 +7,7 @@ from sg_sync_function_tester.sg_sync_function_tester import WORK
 
 
 class TestWORK(unittest.TestCase):
-     
+
     def setUp(self):
         self.config = {
             "sgHost": "http://localhost",
@@ -30,7 +30,7 @@ class TestWORK(unittest.TestCase):
                 "PURGE"
             ]
         }
-        
+
         self.config_file = 'test_config.json'
         with open(self.config_file, 'w') as f:
             json.dump(self.config, f)
@@ -40,7 +40,7 @@ class TestWORK(unittest.TestCase):
         self.sample_doc = {"_id": "foo", "channels": ["bob"]}
         with open(os.path.join(self.json_folder, 'foo.json'), 'w') as f:
             json.dump(self.sample_doc, f)
-        self.work = WORK(self.config_file)    
+        self.work = WORK(self.config_file)
 
     def tearDown(self):
         os.remove(self.config_file)
@@ -77,8 +77,10 @@ class TestWORK(unittest.TestCase):
         mock_response.raise_for_status = MagicMock()
         mock_request.return_value = mock_response
 
-        url = f"{self.work.sgHost}:{self.work.sgPort}/{self.work.constructDbUrl()}/foo"
-        result = self.work.httpRequest("PUT", url, json_data=self.sample_doc, userName="bob", password="12345")
+        url = (f"{self.work.sgHost}:{self.work.sgPort}/"
+               f"{self.work.constructDbUrl()}/foo")
+        result = self.work.httpRequest("PUT", url, json_data=self.sample_doc,
+                                       userName="bob", password="12345")
 
         self.assertEqual(result, {"ok": True, "id": "foo", "rev": "1-a"})
         mock_request.assert_called_once_with(
@@ -87,7 +89,6 @@ class TestWORK(unittest.TestCase):
             headers={'Content-Type': 'application/json'},
             auth=HTTPBasicAuth("bob", "12345")
         )
-
     @patch('requests.request')
     def test_getChangesFeed(self, mock_request):
         changes_feed = {
@@ -104,7 +105,11 @@ class TestWORK(unittest.TestCase):
 
         self.assertEqual(result, changes_feed)
         url = f"{self.work.sgHost}:{self.work.sgPort}/{self.work.constructDbUrl()}/_changes?filter=sync_gateway/bychannel&channels=bob"
-        mock_request.assert_called_once_with("GET", url, json=None, headers={'Content-Type': 'application/json'}, auth=HTTPBasicAuth("bob", "12345"))
+        mock_request.assert_called_once_with(
+            "GET", url,
+            json=None, headers={'Content-Type': 'application/json'},
+            auth=HTTPBasicAuth("bob", "12345")
+            )
 
     @patch('requests.request')
     def test_postPurge(self, mock_request):
@@ -154,18 +159,61 @@ class TestWORK(unittest.TestCase):
         sgDbUrl = f"{self.work.sgHost}:{self.work.sgPort}/{self.work.sgDb}"
         sgAdminUrl = f"{self.work.sgHost}:{self.work.sgAdminPort}/{self.work.sgDb}"
         expected_calls = [
-            unittest.mock.call("GET", f"{sgDbUrl}/foo", json=None, headers={'Content-Type': 'application/json'}, auth=HTTPBasicAuth("bob", "12345")),
-            unittest.mock.call("PUT", f"{sgDbUrl}/foo", json={'_id': 'foo', 'channels': ['bob'], '_rev': '1-a', 'dateTimeStamp': unittest.mock.ANY}, headers={'Content-Type': 'application/json'}, auth=HTTPBasicAuth("bob", "12345")),
-            unittest.mock.call("DELETE", f"{sgDbUrl}/foo?rev=1-a", json=None, headers={'Content-Type': 'application/json'}, auth=HTTPBasicAuth("bob", "12345")),
-            unittest.mock.call("GET", f"{sgDbUrl}/_changes", json=None, headers={'Content-Type': 'application/json'}, auth=HTTPBasicAuth("bob", "12345")),
-            unittest.mock.call("GET", f"{sgAdminUrl}/foo", json=None, headers={'Content-Type': 'application/json'}, auth=HTTPBasicAuth(self.work.sgAdminUser, self.work.sgAdminPassword)),
-            unittest.mock.call("PUT", f"{sgAdminUrl}/foo", json={'_id': 'foo', 'channels': ['bob'], '_rev': '1-a', 'dateTimeStamp': unittest.mock.ANY}, headers={'Content-Type': 'application/json'}, auth=HTTPBasicAuth(self.work.sgAdminUser, self.work.sgAdminPassword)),
-            unittest.mock.call("DELETE", f"{sgAdminUrl}/foo?rev=1-a", json=None, headers={'Content-Type': 'application/json'}, auth=HTTPBasicAuth(self.work.sgAdminUser, self.work.sgAdminPassword)),
-            unittest.mock.call("GET", f"{sgAdminUrl}/_changes?filter=sync_gateway/bychannel&channels=bob", json=None, headers={'Content-Type': 'application/json'}, auth=HTTPBasicAuth(self.work.sgAdminUser, self.work.sgAdminPassword)),
-            unittest.mock.call("GET", f"{sgAdminUrl}/_raw/foo", json=None, headers={'Content-Type': 'application/json'}, auth=HTTPBasicAuth(self.work.sgAdminUser, self.work.sgAdminPassword)),
-            unittest.mock.call("POST", f"{sgAdminUrl}/_purge", json={"foo": ["*"]}, headers={'Content-Type': 'application/json'}, auth=HTTPBasicAuth(self.work.sgAdminUser, self.work.sgAdminPassword))
+            unittest.mock.call(
+                "GET", f"{sgDbUrl}/foo",
+                json=None, headers={'Content-Type': 'application/json'},
+                auth=HTTPBasicAuth("bob", "12345")
+            ),
+            unittest.mock.call(
+                "PUT", f"{sgDbUrl}/foo",
+                json={'_id': 'foo', 'channels': ['bob'],
+                      '_rev': '1-a', 'dateTimeStamp': unittest.mock.ANY},
+                headers={'Content-Type': 'application/json'},
+                auth=HTTPBasicAuth("bob", "12345")
+                ),
+            unittest.mock.call(
+                "DELETE", f"{sgDbUrl}/foo?rev=1-a",
+                json=None, headers={'Content-Type': 'application/json'},
+                auth=HTTPBasicAuth("bob", "12345")
+            ),
+            unittest.mock.call(
+                "GET", f"{sgDbUrl}/_changes",
+                json=None, headers={'Content-Type': 'application/json'},
+                auth=HTTPBasicAuth("bob", "12345")
+            ),
+            unittest.mock.call(
+                "GET", f"{sgAdminUrl}/foo",
+                json=None, headers={'Content-Type': 'application/json'},
+                auth=HTTPBasicAuth(self.work.sgAdminUser, self.work.sgAdminPassword)
+            ),
+            unittest.mock.call(
+                "PUT", f"{sgAdminUrl}/foo",
+                json={'_id': 'foo', 'channels': ['bob'], '_rev': '1-a',
+                      'dateTimeStamp': unittest.mock.ANY},
+                headers={'Content-Type': 'application/json'},
+                auth=HTTPBasicAuth(self.work.sgAdminUser, self.work.sgAdminPassword)
+            ),
+            unittest.mock.call(
+                "DELETE", f"{sgAdminUrl}/foo?rev=1-a",
+                json=None, headers={'Content-Type': 'application/json'},
+                auth=HTTPBasicAuth(self.work.sgAdminUser, self.work.sgAdminPassword)
+            ),
+            unittest.mock.call(
+                "GET", f"{sgAdminUrl}/_changes?filter=sync_gateway/bychannel&channels=bob",
+                json=None, headers={'Content-Type': 'application/json'},
+                auth=HTTPBasicAuth(self.work.sgAdminUser, self.work.sgAdminPassword)
+            ),
+            unittest.mock.call(
+                "GET", f"{sgAdminUrl}/_raw/foo",
+                json=None, headers={'Content-Type': 'application/json'},
+                auth=HTTPBasicAuth(self.work.sgAdminUser, self.work.sgAdminPassword)
+            ),
+            unittest.mock.call(
+                "POST", f"{sgAdminUrl}/_purge",
+                json={"foo": ["*"]}, headers={'Content-Type': 'application/json'},
+                auth=HTTPBasicAuth(self.work.sgAdminUser, self.work.sgAdminPassword)
+            )
         ]
-        
         mock_request.assert_has_calls(expected_calls, any_order=True)
 
     def test_constructDbUrl(self):
