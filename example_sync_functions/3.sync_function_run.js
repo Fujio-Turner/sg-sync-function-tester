@@ -1,6 +1,5 @@
 function(doc, oldDoc) {
 
-    let a;
     try {
         a = doc._id.split(":");
     } catch (error) {
@@ -34,6 +33,7 @@ function(doc, oldDoc) {
 
 function fieldCheck(elementName) {
     // Check if elementName exists in the data object, is not null, not empty, and not an integer
+    // channels can not be integers but they can be strings: 100 BAD , "100" GOOD
     if (typeof elementName !== 'undefined' && elementName !== null && elementName !== '' && typeof elementName !== 'number') {
         return true;
     } else {
