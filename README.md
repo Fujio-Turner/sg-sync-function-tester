@@ -158,3 +158,5 @@ Here is a link to understand what the Sync Function can and can not do.
 
 
 Works on My Computer - Tested & Certified ;-)
+
+Lets Lint it.
