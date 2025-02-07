@@ -1,5 +1,4 @@
 function(doc, oldDoc) {
-
     try {
         a = doc._id.split(":");
     } catch (error) {
