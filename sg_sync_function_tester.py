@@ -85,7 +85,7 @@ class Work():
 
     # Closes the log file
     def closeLogFile(self):
-        if hasattr(self, 'file_handler'):
+        if hasattr(self, 'file_handler') and self.file_handler:
             self.file_handler.close()
             self.logger.removeHandler(self.file_handler)
 
