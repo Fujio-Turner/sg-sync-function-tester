@@ -1,43 +1,61 @@
 function(doc, oldDoc) {
-    var parts;
 
+    var parts = [];                    
+    
     try {
-        parts = doc._id.split("-");
+        parts = doc._id.split(":");
     } catch (e) {
-        throw({forbidden: "Invalid document ID format"});
+        throw({forbidden: "error: invalid document ID format"});
     }
 
-    // Handle tombstone (deleted document)
-    if (doc._deleted === true) {  
+    var type = parts[0];
+
+    // Handle deletion
+    if (doc._deleted === true) {
+        
         requireRole(["editor", "admin"]);
-        return; 
+        return;
+    
+    }else{
+
+        // Role check
+        if (type === "order") {
+            requireRole(["editor", "admin", "user"]);
+        } else if (type === "job") {
+            requireRole(["manager", "editor", "admin"]);
+        } else {
+            throw({forbidden: "error: invalid docType"});
+        }
+
+        // CHANNEL FIELD – CHANGE "channels" TO YOUR ACTUAL FIELD NAME BELOW
+        var ch = getChannels("channels");   // ←←← UPDATE THIS (e.g. "city", "tags", etc.)
+
+        if (!ch) {
+            // ONLY log when something is wrong — helps catch forgotten field names fast
+            console.log("SYNC FUNCTION WARNING: Field 'channels' is missing, null, empty, or has no valid values in document:", doc._id);
+            throw({forbidden: "error: required channel field is missing or empty"});
+        }
+
+        channel(ch);
     }
-
-    var docType = parts[0];
-
-    if (docType === "order") {
-        requireRole(["editor", "admin", "user"]);
-
-    } else if (docType === "job") {
-        requireRole(["manager", "editor", "admin"]);
-
-    } else {
-        throw({forbidden: "Invalid docType: " + docType});
-    }
-
-    // Validate and assign channels
-    if (!doc.channels || !Array.isArray(doc.channels) || doc.channels.length === 0) {
-        throw({forbidden: "Document must have non-empty 'channels' array"});
-    }
-
-    channel(doc.channels);
 }
 
-// Improved fieldCheck – but actually you don't need it for channels if you validate above
-// Keep it only if you reuse it for other fields
-function requireField(value, fieldName) {
-    if (value === undefined || value === null || value === "" || 
-        (typeof value === "number") || 
-        (Array.isArray(value) && value.length === 0)) {
-        throw({forbidden: "Field '" + fieldName + "' is invalid or missing"});
+function getChannels(field) {
+    var raw = doc[field];
+
+    if (raw === undefined || raw === null) {
+        return false;
     }
+
+    var list = Array.isArray(raw) ? raw : [raw];
+    var clean = [];
+
+    for (var i = 0; i < list.length; i++) {
+        var item = list[i];
+        if (item === null || item === undefined) continue;
+        var s = String(item).trim();
+        if (s !== "") clean.push(s);
+    }
+
+    return clean.length > 0 ? clean : false;
+}
