@@ -2,9 +2,9 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, master, sg-4.x, sg-3.x-rest ]
+    branches: [ main, sg-4.x, sg-3.x-rest ]
   pull_request:
-    branches: [ main, master, sg-4.x, sg-3.x-rest ]
+    branches: [ main, sg-4.x, sg-3.x-rest ]
 
 jobs:
   super-linter:
