@@ -1,0 +1,30 @@
+# Local SG 4.x + Couchbase Server stack for testing the tester.
+#   docker compose -f docker/docker-compose.yml up -d
+#   ./docker/setup.sh
+# Server ports are NOT published on 8091/11210 (to avoid clashing with a local
+# Couchbase install); the web UI is on http://localhost:28091.
+name: sg4-tester
+
+services:
+  cb-server:
+    image: couchbase/server:enterprise-8.0.3
+    ports:
+      - "28091:8091"
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8091/ui/index.html"]
+      interval: 5s
+      retries: 30
+
+  sync-gateway:
+    image: couchbase/sync-gateway:4.1.2-enterprise
+    depends_on:
+      cb-server:
+        condition: service_healthy
+    # SG exits if the bucket/user don't exist yet; keep retrying until setup.sh runs.
+    restart: on-failure
+    command: ["/etc/sync_gateway/sg-bootstrap.json"]
+    volumes:
+      - ./sg-bootstrap.json:/etc/sync_gateway/sg-bootstrap.json:ro
+    ports:
+      - "4984:4984"
+      - "4985:4985"
