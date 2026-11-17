@@ -1,0 +1,6 @@
+# HTTP library
+requests
+
+# Testing framework
+pytest
+# Add any other dependencies here

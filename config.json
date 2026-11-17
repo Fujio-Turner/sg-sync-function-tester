@@ -16,6 +16,7 @@
     "operations":[  
                     "PUT",
                     "GET",
+                    "CONFLICT",
                     "DELETE",
                     "CHANGES",
                     "PUT_ADMIN",
